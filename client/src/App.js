@@ -13,6 +13,7 @@ import AuthLogin from "./pages/auth/AuthLogin";
 import AuthRegister from "./pages/auth/AuthRegister";
 import Onboarding from "./pages/auth/Onboarding";
 import EmailVerification from "./pages/auth/EmailVerification";
+import EventDetails from "./pages/common/EventDetails";
 
 function AppRoutes() {
   const location = useLocation();
@@ -31,6 +32,7 @@ function AppRoutes() {
         <Route path="/register" element={<AuthRegister />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/email-verification" element={<EmailVerification />} />
+        <Route path="/events/:id" element={<EventDetails />} />
         {/* Add more routes for other pages here */}
         <Route path="*" element={<NotFound />} />
       </Routes>
