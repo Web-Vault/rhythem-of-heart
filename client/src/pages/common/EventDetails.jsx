@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaCalendarAlt, FaMapMarkerAlt, FaChair, FaUser, FaRupeeSign, FaTicketAlt, FaArrowRight } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaChair, FaUser, FaRupeeSign, FaTicketAlt, FaArrowRight, FaUsers, FaMicrophone } from "react-icons/fa";
 
 // Mock event data
 const event = {
@@ -47,6 +47,18 @@ const EventDetails = () => {
   // const { id } = useParams(); // For real data fetching
   const availableSeats = event.totalSeats - event.bookedSeats;
   const bookedPercent = Math.round((event.bookedSeats / event.totalSeats) * 100);
+  
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleRegisterAsAudience = () => {
+    alert("Register as Audience clicked!");
+    setShowDropdown(false);
+  };
+
+  const handleRegisterAsPerformer = () => {
+    alert("Register as Performer clicked!");
+    setShowDropdown(false);
+  };
 
   return (
     <div className="eventdetails-fullscreen-refined">
@@ -91,9 +103,30 @@ const EventDetails = () => {
             </div>
             <div className="eventdetails-seats-available">{availableSeats} available</div>
             <div className="eventdetails-seats-price flex items-center gap-2"><FaRupeeSign /> {event.price} <span>per seat</span></div>
-            <button className="eventdetails-buy-btn-glow-refined">
-              <FaTicketAlt /> Buy Ticket
-            </button>
+            <div className="eventdetails-register-dropdown-wrap">
+              <button 
+                className="eventdetails-buy-btn-glow-refined"
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                <FaTicketAlt /> Register Yourself
+              </button>
+              {showDropdown && (
+                <div className="eventdetails-dropdown-menu">
+                  <button 
+                    className="eventdetails-dropdown-item"
+                    onClick={handleRegisterAsAudience}
+                  >
+                    <FaUsers /> Register as Audience
+                  </button>
+                  <button 
+                    className="eventdetails-dropdown-item"
+                    onClick={handleRegisterAsPerformer}
+                  >
+                    <FaMicrophone /> Register as Performer
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -329,29 +362,85 @@ const EventDetails = () => {
           color: #fff;
           font-weight: 900;
           border-radius: 2.2rem;
-          padding: 1.2rem 0;
+          padding: 1.2rem;
           font-size: 1.25rem;
           transition: background 0.16s, box-shadow 0.16s, transform 0.13s;
           box-shadow: 0 8px 32px #6366f144, 0 2px 12px #6366f122;
           border: none;
           letter-spacing: 0.01em;
           outline: none;
-          min-width: 220px;
+          min-width: max-content;
           margin-top: 1.2rem;
           display: flex;
           align-items: center;
           gap: 1rem;
           justify-content: center;
+          transition: all ease-in-out 1.16s;
           animation: eventdetailsBtnGlow 2.5s infinite alternate;
         }
         .eventdetails-buy-btn-glow-refined:hover, .eventdetails-buy-btn-glow-refined:focus {
           background: linear-gradient(90deg, #818cf8 60%, #6366f1 100%);
           box-shadow: 0 12px 40px #6366f144, 0 4px 24px #6366f122;
-          transform: translateY(-2px) scale(1.04);
+          // transform: translateY(-2px) scale(1.04);
         }
         @keyframes eventdetailsBtnGlow {
           0% { box-shadow: 0 8px 32px #6366f144, 0 2px 12px #6366f122; }
           100% { box-shadow: 0 16px 48px #6366f199, 0 4px 24px #6366f144; }
+        }
+        /* DROPDOWN MENU */
+        .eventdetails-register-dropdown-wrap {
+          position: relative;
+          display: inline-block;
+        }
+        .eventdetails-dropdown-menu {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: #fff;
+          border-radius: 1.2rem;
+          box-shadow: 0 8px 32px #6366f144, 0 4px 16px #6366f122;
+          border: 1.5px solid #e0e7ff;
+          overflow: hidden;
+          z-index: 1000;
+          margin-top: 0.5rem;
+          animation: dropdownSlideIn 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        @keyframes dropdownSlideIn {
+          0% { 
+            opacity: 0; 
+            transform: translateY(-10px) scale(0.95);
+          }
+          100% { 
+            opacity: 1; 
+            transform: translateY(0) scale(1);
+          }
+        }
+        .eventdetails-dropdown-item {
+          width: 100%;
+          padding: 1rem 1.2rem;
+          background: transparent;
+          border: none;
+          color: #232046;
+          font-size: 1.08rem;
+          font-weight: 600;
+          text-align: left;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+          transition: background 0.18s, color 0.18s;
+          border-bottom: 1px solid #f1f5ff;
+        }
+        .eventdetails-dropdown-item:last-child {
+          border-bottom: none;
+        }
+        .eventdetails-dropdown-item:hover {
+          background: #f8fafc;
+          color: #6366f1;
+        }
+        .eventdetails-dropdown-item:active {
+          background: #eef2ff;
         }
         /* OTHER EVENTS */
         .events-tile-section {

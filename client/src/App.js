@@ -14,10 +14,19 @@ import AuthRegister from "./pages/auth/AuthRegister";
 import Onboarding from "./pages/auth/Onboarding";
 import EmailVerification from "./pages/auth/EmailVerification";
 import EventDetails from "./pages/common/EventDetails";
+import ArtistHome from "./pages/artist/ArtistHome";
+// import ArtistEvents from "./pages/artist/ArtistEvents";
+import ArtistPosts from "./pages/artist/ArtistPosts";
+import ArtistProfile from "./pages/artist/ArtistProfile";
+import MyEvents from "./pages/artist/MyEvents";
+import ArtistEventDetail from "./pages/artist/ArtistEventDetail";
+// import ArtistTicketHistory from "./pages/artist/ArtistTicketHistory";
+import OtherArtistList from "./pages/artist/OtherArtistList";
 
 function AppRoutes() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/onboarding" || location.pathname === "/email-verification";
+  const isArtistDashboard = location.pathname.startsWith("/artist/");
+  const hideNavbar = isArtistDashboard || location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/onboarding" || location.pathname === "/email-verification";
   return (
     <>
       {!hideNavbar && <AppNavbar />}
@@ -33,10 +42,19 @@ function AppRoutes() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/email-verification" element={<EmailVerification />} />
         <Route path="/events/:id" element={<EventDetails />} />
+        {/* Artist pages */}
+        <Route path="/artist/home" element={<ArtistHome />} />
+        {/* <Route path="/artist/events" element={<ArtistEvents />} /> */}
+        <Route path="/artist/posts" element={<ArtistPosts />} />
+        <Route path="/artist/profile" element={<ArtistProfile />} />
+        <Route path="/artist/my-events" element={<MyEvents />} />
+        <Route path="/artist/event/:id" element={<ArtistEventDetail />} />
+        {/* <Route path="/artist/ticket-history" element={<ArtistTicketHistory />} /> */}
+        <Route path="/artist/other-artists" element={<OtherArtistList />} />
         {/* Add more routes for other pages here */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <AppFooter />
+      {!hideNavbar && <AppFooter />}
     </>
   );
 }

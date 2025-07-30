@@ -336,8 +336,8 @@ const AppHome = () => {
   top: 0;
   right: 0;
   bottom: 0;
-  left: 40%;
-  background: url('https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=1600&q=90') center right/cover no-repeat;
+  left: 0%;
+  background: url('/images/home-hero-bg-img.jpg') center right/cover no-repeat;
   filter: brightness(0.8) saturate(1.1);
   opacity: 0.85;
   z-index: 1;
