@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { FaCalendarAlt, FaMapMarkerAlt, FaChair, FaUser, FaRupeeSign, FaTicketAlt, FaArrowRight, FaUsers, FaMicrophone } from "react-icons/fa";
 
 // Mock event data
@@ -45,18 +45,19 @@ const otherEvents = [
 
 const EventDetails = () => {
   // const { id } = useParams(); // For real data fetching
+  const navigate = useNavigate();
   const availableSeats = event.totalSeats - event.bookedSeats;
   const bookedPercent = Math.round((event.bookedSeats / event.totalSeats) * 100);
   
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleRegisterAsAudience = () => {
-    alert("Register as Audience clicked!");
+    navigate('/register/audience');
     setShowDropdown(false);
   };
 
   const handleRegisterAsPerformer = () => {
-    alert("Register as Performer clicked!");
+    navigate('/register/performer');
     setShowDropdown(false);
   };
 

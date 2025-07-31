@@ -14,6 +14,7 @@ import AuthRegister from "./pages/auth/AuthRegister";
 import Onboarding from "./pages/auth/Onboarding";
 import EmailVerification from "./pages/auth/EmailVerification";
 import EventDetails from "./pages/common/EventDetails";
+import TicketRegistration from "./pages/common/TicketRegistration";
 import ArtistHome from "./pages/artist/ArtistHome";
 // import ArtistEvents from "./pages/artist/ArtistEvents";
 import ArtistPosts from "./pages/artist/ArtistPosts";
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/email-verification" element={<EmailVerification />} />
         <Route path="/events/:id" element={<EventDetails />} />
+        <Route path="/register/:type" element={<TicketRegistration />} />
         {/* Artist pages */}
         <Route path="/artist/home" element={<ArtistHome />} />
         {/* <Route path="/artist/events" element={<ArtistEvents />} /> */}
