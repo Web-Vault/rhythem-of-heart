@@ -392,6 +392,8 @@ const EventDetails = () => {
         .eventdetails-register-dropdown-wrap {
           position: relative;
           display: inline-block;
+          z-index: 9999;
+          width: 100%;
         }
         .eventdetails-dropdown-menu {
           position: absolute;
@@ -400,25 +402,16 @@ const EventDetails = () => {
           right: 0;
           background: #fff;
           border-radius: 1.2rem;
-          box-shadow: 0 8px 32px #6366f144, 0 4px 16px #6366f122;
+          box-shadow: 0 8px 32px rgba(99, 102, 241, 0.27), 0 4px 16px rgba(99, 102, 241, 0.13);
           border: 1.5px solid #e0e7ff;
           overflow: hidden;
-          z-index: 1000;
           margin-top: 0.5rem;
           animation: dropdownSlideIn 0.2s cubic-bezier(0.4,0,0.2,1);
-        }
-        @keyframes dropdownSlideIn {
-          0% { 
-            opacity: 0; 
-            transform: translateY(-10px) scale(0.95);
-          }
-          100% { 
-            opacity: 1; 
-            transform: translateY(0) scale(1);
-          }
+          z-index: 10000;
+          isolation: isolate;
         }
         .eventdetails-dropdown-item {
-          width: 100%;
+          // width: 100%;
           padding: 1rem 1.2rem;
           background: transparent;
           border: none;
@@ -430,8 +423,10 @@ const EventDetails = () => {
           display: flex;
           align-items: center;
           gap: 0.8rem;
-          transition: background 0.18s, color 0.18s;
+          transition: all 0.18s ease;
           border-bottom: 1px solid #f1f5ff;
+          position: relative;
+          z-index: 5;
         }
         .eventdetails-dropdown-item:last-child {
           border-bottom: none;
@@ -665,4 +660,4 @@ const EventDetails = () => {
   );
 };
 
-export default EventDetails; 
+export default EventDetails;

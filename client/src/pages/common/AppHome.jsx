@@ -176,13 +176,11 @@ const AppHome = () => {
         </div>
         <div className="events-tile-header-divider"></div>
         <div className="events-tile-carousel-wrap relative">
-          <div className="events-tile-fade-left"></div>
-          <div className="events-tile-fade-right"></div>
-          <div className="events-tile-carousel flex gap-10 overflow-x-auto pb-2 snap-x justify-center mx-auto max-w-6xl px-4 md:px-0">
+          <div className="events-tile-carousel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-6xl px-4 md:px-0">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="event-tile-item group relative min-w-[340px] md:min-w-[400px] max-w-[90vw] snap-start"
+                className="event-tile-item group relative w-full"
               >
                 <div className="event-tile-img-wrap relative">
                   {/* <div className="event-tile-accent-bar"></div> */}
@@ -239,38 +237,46 @@ const AppHome = () => {
       </section>
 
       {/* HOW IT WORKS SECTION */}
-      <section className="howitworks-section-gradient py-24 px-4 md:px-0">
-        <div className="container mx-auto howitworks-flex-wrap flex flex-col md:flex-row md:items-start md:justify-between gap-12 md:gap-20 max-w-6xl">
-          <div className="howitworks-left flex-1 min-w-[260px]">
-            <h2 className="howitworks-title-pro">How It Works</h2>
+      <section className="howitworks-section-gradient relative py-32 px-4 md:px-0 overflow-hidden">
+        <div className="container mx-auto max-w-6xl relative z-10">
+          <div className="howitworks-header flex flex-col justify-start text-left mb-20">
+            <h2 className="howitworks-title-pro text-4xl md:text-5xl mb-6">How It Works</h2>
             <div className="howitworks-title-underline-pro howitworks-title-underline-animated"></div>
-            <div className="howitworks-subheading-pro">
-              A simple process to join, explore, and enjoy poetry events in
-              Rajkot.
-            </div>
+            <p className="howitworks-subtitle-pro text-gray-600 max-w-2xl mt-6">
+              Discover the seamless journey from inspiration to performance
+            </p>
           </div>
-          <div className="howitworks-steps-timeline flex-1 flex flex-col md:flex-row items-center md:items-start justify-between gap-10 md:gap-0 relative">
+          
+          <div className="howitworks-steps flex flex-col md:flex-row gap-6 flex-wrap justify-center">
             {howItWorksSteps.map((step, idx) => (
-              <React.Fragment key={"step-" + idx}>
-                <div className="flex items-stretch">
-                  <div className="howitworks-step-timeline flex flex-col items-center text-center relative z-10">
-                    <div className="howitworks-step-icon-wrap">
-                      <span className="howitworks-step-icon">
-                        {step.icon}
-                      </span>
-                    </div>
-                    <div className="howitworks-step-title-pro">
-                      {step.title}
-                    </div>
-                    <div className="howitworks-step-desc-pro">{step.desc}</div>
-                  </div>
-                  {idx < howItWorksSteps.length - 1 && (
-                    <div className="howitworks-step-connector md:block hidden"></div>
-                  )}
+              <div key={idx} className="step-card group w-full md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 relative">
+                <div className="step-number absolute -top-4 -right-4 w-20 h-20 flex items-center justify-center rotate-12 bg-indigo-50 rounded-full z-2">
+                  <span className="text-4xl font-bold text-indigo-200 -rotate-12">{idx + 1}</span>
                 </div>
-              </React.Fragment>
+                
+                <div className="step-icon-container relative mb-8">
+                  <div className="step-icon-bg w-16 h-16 flex items-center justify-center bg-indigo-50 rounded-2xl relative z-10 group-hover:bg-indigo-100 transition-all duration-300">
+                    {step.icon}
+                  </div>
+                  <div className="step-icon-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-indigo-500 opacity-0 group-hover:opacity-10 blur-2xl transition-all duration-300"></div>
+                </div>
+
+                <div className="step-content relative z-10">
+                  <h3 className="step-title text-2xl font-bold mb-4 text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">{step.title}</h3>
+                  <p className="step-description text-gray-600 leading-relaxed">{step.desc}</p>
+                </div>
+
+                <div className="decorative-line absolute bottom-0 left-0 rounded-b-2xl w-full h-1 bg-gradient-to-r from-indigo-500 to-indigo-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              </div>
             ))}
           </div>
+        </div>
+        
+        {/* Background decoration */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+          <div className="absolute top-20 left-0 w-72 h-72 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+          <div className="absolute top-40 right-0 w-72 h-72 bg-pink-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-20 left-20 w-72 h-72 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
       </section>
 
@@ -684,46 +690,27 @@ const AppHome = () => {
   width: 100%;
 }
 
-.events-tile-fade-left, .events-tile-fade-right {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 60px;
-  z-index: 10;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
 
-.events-tile-fade-left {
-  left: 0;
-  background: linear-gradient(90deg, #f8fafc 80%, transparent 100%);
-}
-
-.events-tile-fade-right {
-  right: 0;
-  background: linear-gradient(270deg, #f8fafc 80%, transparent 100%);
-}
 
 .events-tile-carousel {
   max-width: 100%;
   margin: 0 auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 0.5rem;
+  padding:6rem;
+  width: 100%;
   box-sizing: border-box;
 }
 
 .event-tile-item {
-  flex: 0 0 auto;
   width: 100%;
-  max-width: 400px;
-  min-width: 340px;
+  max-width: 100%;
   position: relative;
   border-radius: 16px;
   background: transparent;
   box-shadow: none;
   border: 1.5px solid #e0e7ff;
   transition: box-shadow 0.22s, border-color 0.18s;
-  margin-bottom: 1.5rem;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .event-tile-item:hover, .event-tile-item:focus-within {
@@ -962,17 +949,43 @@ const AppHome = () => {
     margin-bottom: 0.3rem;
   }
   .event-tile-item {
-    min-width: 96vw;
-    max-width: 99vw;
-    margin-bottom: 2.2rem;
+    width: 100%;
+    max-width: 100%;
   }
   .events-tile-carousel {
-    gap: 1.2rem;
+    gap: 1rem;
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  .events-tile-fade-left, .events-tile-fade-right {
-    width: 24px;
+
+}
+
+@media (max-width: 640px) {
+  .events-tile-carousel {
+    gap: 0.8rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+  .event-tile-item {
+    width: 100%;
+    max-width: 100%;
+  }
+  .event-tile-img-wrap {
+    min-height: 180px;
+  }
+  .event-tile-content-gradient {
+    padding: 1rem 1.2rem 1.2rem 1.2rem;
+  }
+  .event-tile-desc {
+    font-size: 0.95rem;
+  }
+  .event-tile-meta {
+    font-size: 0.85rem;
+    gap: 1rem;
+  }
+  .event-tile-details-btn {
+    padding: 0.8rem 0;
+    font-size: 0.95rem;
   }
 }
 
@@ -1186,19 +1199,33 @@ const AppHome = () => {
   }
 }
 
-/* How It Works Graphical Stepper */
-.howitworks-flex-wrap {
-  align-items: flex-start;
-  justify-content: space-between;
+/* How It Works Interactive Cards */
+.howitworks-section-gradient {
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #f1f5ff 100%);
+  padding: 6rem 1rem;
+  position: relative;
+  overflow: hidden;
 }
-.howitworks-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  min-width: 220px;
-  max-width: 340px;
+
+.howitworks-section-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(129, 140, 248, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
+
+.howitworks-header {
+  text-align: left;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 1;
+}
+
 .howitworks-title-pro {
   font-size: 2.3rem;
   font-weight: 900;
@@ -1246,120 +1273,661 @@ const AppHome = () => {
   text-align: left;
   letter-spacing: 0.01em;
 }
-.howitworks-steps-timeline {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  width: 100%;
+.howitworks-interactive-grid {
+  display: grid;
+  gap: 2.5rem;
+  padding: 0 1rem;
   position: relative;
-  gap: 0;
+  z-index: 1;
 }
-.howitworks-step-timeline {
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+.howitworks-step-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px #e0e7ff88;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1 1 0;
-  min-width: 120px;
-  max-width: 180px;
-  padding: 0 0.5rem;
-  z-index: 2;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  border: 2px solid transparent;
+  position: relative;
+  animation: cardFloat 6s ease-in-out infinite;
 }
-.howitworks-step-icon-wrap {
-  background: #fff;
+
+.howitworks-step-card:nth-child(1) { animation-delay: 0s; }
+.howitworks-step-card:nth-child(2) { animation-delay: 1s; }
+.howitworks-step-card:nth-child(3) { animation-delay: 2s; }
+.howitworks-step-card:nth-child(4) { animation-delay: 3s; }
+
+.howitworks-step-card:hover {
+  transform: translateY(-15px) scale(1.02);
+  box-shadow: 0 20px 60px #6366f144;
+  border-color: #6366f1;
+}
+
+.howitworks-step-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(129, 140, 248, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 20px;
+}
+
+.howitworks-step-card:hover::before {
+  opacity: 1;
+}
+.step-card-inner {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.step-number {
+  position: absolute;
+  top: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 900;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: 50%;
-  box-shadow: 0 2px 12px #6366f122;
-  width: 56px;
-  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.1rem;
-  border: 2px solid #e0e7ff;
-  transition: box-shadow 0.18s, border 0.18s;
+  box-shadow: 0 6px 20px #6366f144;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
-.howitworks-step-timeline:hover .howitworks-step-icon-wrap,
-.howitworks-step-timeline:focus-within .howitworks-step-icon-wrap {
-  box-shadow: 0 6px 24px #6366f144;
-  border: 2px solid #6366f1;
+
+.howitworks-step-card:hover .step-number {
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 8px 24px #6366f166;
 }
-.howitworks-step-icon {
+.step-icon-container {
+  margin-bottom: 1.5rem;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f1f5ff 0%, #e0e7ff 100%);
+  border-radius: 50%;
+  border: 3px solid #6366f1;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  overflow: hidden;
+}
+
+.step-icon-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.step-icon-wrapper {
   color: #6366f1;
-  font-size: 1.7rem;
+  font-size: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
 }
-.howitworks-step-title-pro {
+
+.howitworks-step-card:hover .step-icon-container {
+  transform: scale(1.1);
+  box-shadow: 0 8px 24px #6366f144;
+}
+
+.howitworks-step-card:hover .step-icon-container::before {
+  transform: scale(1);
+}
+
+.howitworks-step-card:hover .step-icon-wrapper {
+  color: #fff;
+  animation: iconPulse 0.6s ease-in-out;
+}
+.step-content {
+  margin-bottom: 1.5rem;
+}
+.step-title {
   font-size: 1.13rem;
   font-weight: 700;
   color: #232046;
   margin-bottom: 0.3rem;
-  margin-top: 0.1rem;
   letter-spacing: -0.01em;
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }
-.howitworks-step-desc-pro {
+.step-description {
   font-size: 1.01rem;
   color: #6366f1;
   font-weight: 500;
   line-height: 1.5;
   margin-bottom: 0.1rem;
 }
-.howitworks-step-connector {
-  flex: none;
-  width: 48px;
-  height: 3.5px;
-  background: linear-gradient(90deg, #e0e7ff 0%, #6366f1 60%, #818cf8 100%);
-  border-radius: 2px;
-  align-self: center;
-  margin: 0 0.2rem;
+.step-arrow {
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px #6366f144;
   z-index: 1;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  opacity: 0.8;
 }
+
+.step-arrow svg {
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.howitworks-step-card:hover .step-arrow {
+  background: linear-gradient(135deg, #818cf8 0%, #a5b4fc 100%);
+  box-shadow: 0 6px 20px #6366f166;
+  opacity: 1;
+  transform: translateX(-50%) scale(1.1);
+}
+
+.howitworks-step-card:hover .step-arrow svg {
+  transform: translateX(2px);
+}
+
 @media (max-width: 900px) {
-  .howitworks-flex-wrap {
-    flex-direction: column;
-    gap: 2.5rem;
+  .howitworks-section-gradient {
+    padding: 3rem 1rem;
   }
-  .howitworks-steps-timeline {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
+  .howitworks-header {
+    margin-bottom: 3.5rem;
   }
-  .howitworks-step-timeline {
-    flex-direction: row;
-    align-items: flex-start;
-    min-width: 0;
-    max-width: 100vw;
-    margin-bottom: 2.2rem;
-    padding: 0;
-    text-align: left;
+  .howitworks-title-pro {
+    font-size: 2rem;
+    text-align: center;
   }
-  .howitworks-step-icon-wrap {
-    margin-bottom: 0;
-    margin-right: 1.1rem;
-    width: 44px;
-    height: 44px;
+  .howitworks-title-underline-pro {
+    width: 120px;
+    margin: 0 auto 1.3rem auto;
   }
-  .howitworks-step-title-pro, .howitworks-step-desc-pro {
-    text-align: left;
-  }
-  .howitworks-step-title-pro {
+  .howitworks-subheading-pro {
     font-size: 1.05rem;
+    max-width: 100%;
+    text-align: center;
+  }
+  .howitworks-interactive-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 0.8rem;
+  }
+  .howitworks-step-card {
+    padding: 2rem 1.2rem;
+  }
+  .step-number {
+    top: -1rem;
+    font-size: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+  }
+  .step-icon-container {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 1rem;
+  }
+  .step-icon-wrapper {
+    font-size: 2rem;
+  }
+  .step-content {
+    margin-bottom: 1rem;
+  }
+  .step-title {
+    font-size: 1rem;
     margin-bottom: 0.1rem;
     margin-top: 0;
   }
-  .howitworks-step-desc-pro {
+  .step-description {
     font-size: 0.95rem;
   }
-  .howitworks-step-connector {
-    width: 3.5px;
-    height: 44px;
-    background: linear-gradient(180deg, #e0e7ff 0%, #6366f1 60%, #818cf8 100%);
-    margin: 0 0 0 22px;
-    align-self: flex-start;
+  .step-arrow {
+    bottom: -1rem;
+    width: 35px;
+    height: 35px;
   }
 }
+
+@media (max-width: 640px) {
+  .howitworks-section-gradient {
+    padding: 2.5rem 0.8rem;
+  }
+  .howitworks-header {
+    margin-bottom: 3.5rem;
+  }
+  .howitworks-title-pro {
+    font-size: 1.8rem;
+  }
+  .howitworks-title-underline-pro {
+    width: 100px;
+    height: 3px;
+  }
+  .howitworks-subheading-pro {
+    font-size: 1rem;
+  }
+  .howitworks-interactive-grid {
+    gap: 1.2rem;
+    padding: 0 0.6rem;
+  }
+  .howitworks-step-card {
+    padding: 1.8rem 1rem;
+  }
+  .step-number {
+    top: -0.8rem;
+    font-size: 1.3rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .step-icon-container {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 0.8rem;
+  }
+  .step-icon-wrapper {
+    font-size: 1.8rem;
+  }
+  .step-content {
+    margin-bottom: 0.8rem;
+  }
+  .step-title {
+    font-size: 0.95rem;
+  }
+  .step-description {
+    font-size: 0.9rem;
+  }
+  .step-arrow {
+    bottom: -0.8rem;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .howitworks-section-gradient {
+    padding: 2rem 0.5rem;
+  }
+  .howitworks-header {
+    margin-bottom: 3.5rem;
+  }
+  .howitworks-title-pro {
+    font-size: 1.6rem;
+  }
+  .howitworks-title-underline-pro {
+    width: 80px;
+    height: 2.5px;
+  }
+  .howitworks-subheading-pro {
+    font-size: 0.95rem;
+  }
+  .howitworks-interactive-grid {
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+  .howitworks-step-card {
+    padding: 1.5rem 0.8rem;
+  }
+  .step-number {
+    top: -0.6rem;
+    font-size: 1.1rem;
+    width: 2rem;
+    height: 2rem;
+  }
+  .step-icon-container {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.6rem;
+  }
+  .step-icon-wrapper {
+    font-size: 1.5rem;
+  }
+  .step-content {
+    margin-bottom: 0.6rem;
+  }
+  .step-title {
+    font-size: 0.9rem;
+  }
+  .step-description {
+    font-size: 0.85rem;
+  }
+  .step-arrow {
+    bottom: -0.6rem;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+@media (max-width: 900px) {
+  .events-tile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.2rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .events-tile-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+  .event-tile-item {
+    width: 100%;
+    max-width: 100%;
+  }
+  .events-tile-carousel {
+    gap: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+}
+
+@media (max-width: 640px) {
+  .events-tile-carousel {
+    gap: 0.8rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+  .event-tile-item {
+    width: 100%;
+    max-width: 100%;
+  }
+  .event-tile-img-wrap {
+    min-height: 180px;
+  }
+  .event-tile-content-gradient {
+    padding: 1rem 1.2rem 1.2rem 1.2rem;
+  }
+  .event-tile-desc {
+    font-size: 0.95rem;
+  }
+  .event-tile-meta {
+    font-size: 0.85rem;
+    gap: 1rem;
+  }
+  .event-tile-details-btn {
+    padding: 0.8rem 0;
+    font-size: 0.95rem;
+  }
+}
+
+.featured-posts-section-pro {
+  background: #fff;
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+.featured-posts-header-pro {
+  margin-bottom: 3.5rem;
+}
+
+.featured-posts-title-pro {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #232046;
+  letter-spacing: 0.01em;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  margin-bottom: 0.3rem;
+  text-align: left;
+}
+
+.featured-posts-title-underline-pro {
+  width: 140px;
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1 60%, #818cf8 100%);
+  border-radius: 2px;
+  margin-bottom: 1.2rem;
+  margin-top: 0.1rem;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: featuredPostsUnderlineGrow 1.1s cubic-bezier(0.4,0,0.2,1) 0.2s forwards;
+}
+@keyframes featuredPostsUnderlineGrow {
+  0% {
+    transform: scaleX(0);
+    opacity: 0.2;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.featured-posts-subheading-pro {
+  color: #6b7280;
+  font-size: 1.08rem;
+  font-weight: 400;
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
+  max-width: 340px;
+  text-align: left;
+  letter-spacing: 0.01em;
+}
+
+.featured-posts-grid-pro {
+  margin-top: 2.5rem;
+}
+
+.featured-poem-card-pro {
+  background: linear-gradient(120deg, #fff 80%, #f1f5ff 100%);
+  border-radius: 16px;
+  border: 1.5px solid #e0e7ff;
+  box-shadow: none;
+  padding: 2.3rem 1.7rem 1.7rem 1.7rem;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: box-shadow 0.18s, border 0.18s, transform 0.33s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
+  overflow: visible;
+}
+
+.featured-poem-card-pro:hover, .featured-poem-card-pro:focus-within {
+  box-shadow: 0 8px 32px #6366f144;
+  border-color: #6366f1;
+  transform: translateY(-4px) scale(1.02);
+}
+
+.featured-poem-quote-icon-pro {
+  color: #6366f1;
+  font-size: 1.3rem;
+  position: absolute;
+  top: 1.3rem;
+  left: 1.3rem;
+  z-index: 2;
+}
+
+.featured-poem-phrase-pro {
+  font-size: 1.22rem;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #232046;
+  line-height: 1.7;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  margin-top: 2.2rem;
+  margin-bottom: 2.2rem;
+  text-align: left;
+  position: relative;
+}
+
+.featured-poem-underline-pro {
+  display: block;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1 60%, #818cf8 100%);
+  border-radius: 2px;
+  margin-top: 0.7em;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+
+.featured-poem-card-pro:hover .featured-poem-underline-pro,
+.featured-poem-card-pro:focus-within .featured-poem-underline-pro {
+  width: 60%;
+}
+
+.featured-poem-divider-pro {
+  width: 100%;
+  height: 1px;
+  background: #e0e7ff;
+  border-radius: 1px;
+  margin: 1.2rem 0 1.1rem 0;
+}
+
+.featured-poem-author-row-pro {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-top: 0.7rem;
+}
+
+.featured-poem-author-img-pro {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #e0e7ff;
+  box-shadow: 0 2px 8px #6366f111;
+}
+
+.featured-poem-author-name-pro {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #232046;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.1rem;
+  text-align: left;
+  transition: color 0.18s;
+}
+
+.featured-poem-card-pro:hover .featured-poem-author-name-pro,
+.featured-poem-card-pro:focus-within .featured-poem-author-name-pro {
+  color: #6366f1;
+}
+
+.featured-poem-author-role-pro {
+  font-size: 0.93rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-top: 0.1rem;
+  letter-spacing: 0.09em;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .featured-posts-title-pro {
+    font-size: 1.3rem;
+    margin-bottom: 0.2rem;
+  }
+  .featured-posts-title-underline-pro {
+    width: 36px;
+    height: 2px;
+    margin-bottom: 0.7rem;
+  }
+  .featured-posts-subheading-pro {
+    font-size: 0.98rem;
+    max-width: 95vw;
+  }
+  .featured-poem-card-pro {
+    padding: 1.1rem 0.7rem 1.1rem 0.7rem;
+    min-height: 120px;
+    border-radius: 10px;
+  }
+  .featured-poem-quote-icon-pro {
+    font-size: 1rem;
+    top: 0.7rem;
+    left: 0.7rem;
+  }
+  .featured-poem-phrase-pro {
+    font-size: 1.01rem;
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  .featured-poem-author-img-pro {
+    width: 28px;
+    height: 28px;
+  }
+  .featured-poem-author-name-pro {
+    font-size: 0.98rem;
+  }
+
       `}</style>
     </>
   );

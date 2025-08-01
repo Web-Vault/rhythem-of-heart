@@ -26,13 +26,11 @@ const AppEvents = () => {
         </div>
         <div className="events-tile-header-divider"></div>
         <div className="events-tile-carousel-wrap relative">
-          <div className="events-tile-fade-left"></div>
-          <div className="events-tile-fade-right"></div>
-          <div className="events-tile-carousel flex gap-10 overflow-x-auto pb-2 snap-x justify-center mx-auto max-w-6xl px-4 md:px-0">
+          <div className="events-tile-carousel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 mx-auto max-w-6xl px-4 md:px-0">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="event-tile-item group relative min-w-[340px] md:min-w-[400px] max-w-[90vw] snap-start"
+                className="event-tile-item group relative w-full"
               >
                 <div className="event-tile-img-wrap relative">
                   <img
@@ -161,42 +159,24 @@ const AppEvents = () => {
   box-sizing: border-box;
   width: 100%;
 }
-.events-tile-fade-left, .events-tile-fade-right {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 60px;
-  z-index: 10;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.events-tile-fade-left {
-  left: 0;
-  background: linear-gradient(90deg, #f8fafc 80%, transparent 100%);
-}
-.events-tile-fade-right {
-  right: 0;
-  background: linear-gradient(270deg, #f8fafc 80%, transparent 100%);
-}
 .events-tile-carousel {
   max-width: 100%;
   margin: 0 auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 0.5rem;
+  padding: 6rem;
+  width: 100%;
   box-sizing: border-box;
 }
 .event-tile-item {
-  flex: 0 0 auto;
   width: 100%;
-  max-width: 400px;
-  min-width: 340px;
+  max-width: 100%;
   position: relative;
   border-radius: 16px;
   background: transparent;
   box-shadow: none;
   border: 1.5px solid #e0e7ff;
   transition: box-shadow 0.22s, border-color 0.18s;
-  margin-bottom: 1.5rem;
   overflow: hidden;
+  box-sizing: border-box;
 }
 .event-tile-item:hover, .event-tile-item:focus-within {
   box-shadow: 0 8px 32px #6366f144, 0 1.5px 0 #e0e7ff inset;
@@ -359,6 +339,86 @@ const AppEvents = () => {
 }
 .event-tile-details-btn:hover i {
   transform: translateX(4px);
+}
+
+/* Responsive adjustments for mobile screens */
+@media (max-width: 900px) {
+  .events-tile-section {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+  .events-tile-title {
+    font-size: 2.2rem;
+  }
+  .events-tile-subheading {
+    font-size: 1.05rem;
+    max-width: 100%;
+  }
+  .event-tile-item {
+    width: 100%;
+    max-width: 100%;
+  }
+  .events-tile-carousel {
+    gap: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .event-tile-img-wrap {
+    min-height: 200px;
+  }
+  .event-tile-content-gradient {
+    padding: 1.2rem 1.5rem 1.5rem 1.5rem;
+  }
+  .event-tile-desc {
+    font-size: 0.98rem;
+  }
+  .event-tile-meta {
+    font-size: 0.9rem;
+    gap: 1.5rem;
+  }
+  .event-tile-details-btn {
+    padding: 0.9rem 0;
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .events-tile-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  .events-tile-title {
+    font-size: 2rem;
+  }
+  .events-tile-subheading {
+    font-size: 1rem;
+  }
+  .event-tile-item {
+    width: 100%;
+    max-width: 100%;
+  }
+  .events-tile-carousel {
+    gap: 0.8rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+  }
+  .event-tile-img-wrap {
+    min-height: 180px;
+  }
+  .event-tile-content-gradient {
+    padding: 1rem 1.2rem 1.2rem 1.2rem;
+  }
+  .event-tile-desc {
+    font-size: 0.95rem;
+  }
+  .event-tile-meta {
+    font-size: 0.85rem;
+    gap: 1rem;
+  }
+  .event-tile-details-btn {
+    padding: 0.8rem 0;
+    font-size: 0.95rem;
+  }
 }
       `}</style>
     </>

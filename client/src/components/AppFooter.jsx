@@ -55,6 +55,7 @@ const AppFooter = () => (
 <style>
   {`
 .footer-simple-wrapper {
+  z-index: -1;
   background: #f9fafb;
   border-top: 3px solid;
   border-image: linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%) 1;

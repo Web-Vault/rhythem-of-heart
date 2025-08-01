@@ -146,7 +146,7 @@ const TicketRegistration = () => {
   };
 
   const handleBackToEvent = () => {
-    navigate('/event/1');
+    navigate('/events/1');
   };
 
   return (
