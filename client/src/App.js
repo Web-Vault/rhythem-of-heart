@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import AppNavbar from "./components/AppNavbar";
 import AppHome from "./pages/common/AppHome";
 import AppEvents from "./pages/common/AppEvents";
@@ -37,7 +39,7 @@ function AppRoutes() {
         <Route path="/posts" element={<AppPosts />} />
         <Route path="/artists" element={<ArtistList />} />
         <Route path="/artist/:id" element={<UserProfile />} />
-        <Route path="/my-profile" element={<MyProfile />} />
+        <Route path="/my-profile" element={<ProtectedRoute><MyProfile /></ProtectedRoute>} />
         <Route path="/login" element={<AuthLogin />} />
         <Route path="/register" element={<AuthRegister />} />
         <Route path="/onboarding" element={<Onboarding />} />
@@ -45,14 +47,14 @@ function AppRoutes() {
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/register/:type" element={<TicketRegistration />} />
         {/* Artist pages */}
-        <Route path="/artist/home" element={<ArtistHome />} />
+        <Route path="/artist/home" element={<ProtectedRoute requiresPerformer={true}><ArtistHome /></ProtectedRoute>} />
         {/* <Route path="/artist/events" element={<ArtistEvents />} /> */}
-        <Route path="/artist/posts" element={<ArtistPosts />} />
-        <Route path="/artist/profile" element={<ArtistProfile />} />
-        <Route path="/artist/my-events" element={<MyEvents />} />
-        <Route path="/artist/event/:id" element={<ArtistEventDetail />} />
-        {/* <Route path="/artist/ticket-history" element={<ArtistTicketHistory />} /> */}
-        <Route path="/artist/other-artists" element={<OtherArtistList />} />
+        <Route path="/artist/posts" element={<ProtectedRoute requiresPerformer={true}><ArtistPosts /></ProtectedRoute>} />
+        <Route path="/artist/profile" element={<ProtectedRoute requiresPerformer={true}><ArtistProfile /></ProtectedRoute>} />
+        <Route path="/artist/my-events" element={<ProtectedRoute requiresPerformer={true}><MyEvents /></ProtectedRoute>} />
+        <Route path="/artist/event/:id" element={<ProtectedRoute requiresPerformer={true}><ArtistEventDetail /></ProtectedRoute>} />
+        {/* <Route path="/artist/ticket-history" element={<ArtistTicketHistory />} />*/}
+        <Route path="/artist/other-artists" element={<ProtectedRoute requiresPerformer={true}><OtherArtistList /></ProtectedRoute>} />
         {/* Add more routes for other pages here */}
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -63,9 +65,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <Router>
-      <AppRoutes />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
   );
 }
 

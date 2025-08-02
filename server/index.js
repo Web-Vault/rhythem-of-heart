@@ -4,9 +4,10 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import cors from "cors";
 import bodyParser from "body-parser";
-
-
 import path from "path";
+
+// Import routes
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -36,6 +37,9 @@ mongoose
                 process.exit(1);
         });
 
+
+// API Routes
+app.use('/api/auth', authRoutes);
 
 // Default Route
 app.get("/", (req, res) => {

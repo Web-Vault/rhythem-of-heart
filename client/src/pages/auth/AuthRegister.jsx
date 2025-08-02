@@ -73,14 +73,44 @@ const AuthRegister = () => {
     return valid;
   }
 
-  function handleRegister(e) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleRegister(e) {
     e.preventDefault();
     if (!validate()) return;
-    // Simulate register
-    if (isArtist) {
-      navigate('/onboarding');
-    } else {
-      navigate('/email-verification');
+    
+    setLoading(true);
+    setErrors({ name: '', email: '', password: '', confirmPassword: '', general: '' });
+    
+    try {
+      // Import here to avoid circular dependencies
+      const { register } = await import('../../services/authService');
+      
+      const userData = {
+        name,
+        email,
+        password,
+        mobileNumber: '', // Can be updated later in profile
+        isPerformer: isArtist
+      };
+      
+      const response = await register(userData);
+      
+      if (response.success) {
+        // Redirect based on user type
+        if (isArtist) {
+          navigate('/onboarding');
+        } else {
+          navigate('/');
+        }
+      }
+    } catch (error) {
+      setErrors({
+        ...errors,
+        general: error.message || 'Registration failed. Please try again.'
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -139,7 +169,9 @@ const AuthRegister = () => {
                 <label htmlFor="artist" className="text-gray-700">Register as Artist/Poet</label>
               </div>
               {errors.general && <span className="error-msg block mb-2 text-center">{errors.general}</span>}
-              <button className="themed-btn w-full mt-2">Register</button>
+              <button className="themed-btn w-full mt-2" type="submit" disabled={loading}>
+                {loading ? 'Registering...' : 'Register'}
+              </button>
             </form>
             <div className="mt-8 text-sm text-center">
               <Link to="/login" className="text-indigo-600 hover:underline">Already have an account? Login</Link>
@@ -321,4 +353,4 @@ const AuthRegister = () => {
   );
 };
 
-export default AuthRegister; 
+export default AuthRegister;

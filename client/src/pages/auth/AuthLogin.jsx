@@ -61,14 +61,35 @@ const AuthLogin = () => {
     return valid;
   }
 
-  function handleLogin(e) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(e) {
     e.preventDefault();
     if (!validate()) return;
-    // Simulate login
-    if (isArtist) {
-      navigate('/artist/home');
-    } else {
-      navigate('/');
+    
+    setLoading(true);
+    setErrors({ email: '', password: '', general: '' });
+    
+    try {
+      // Import here to avoid circular dependencies
+      const { login } = await import('../../services/authService');
+      const response = await login(email, password);
+      
+      if (response.success) {
+        // Check if user is an artist to redirect appropriately
+        if (response.user.isPerformer) {
+          navigate('/artist/home');
+        } else {
+          navigate('/');
+        }
+      }
+    } catch (error) {
+      setErrors({
+        ...errors,
+        general: error.message || 'Login failed. Please check your credentials.'
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -111,7 +132,9 @@ const AuthLogin = () => {
                 {errors.password && <span className="error-msg">{errors.password}</span>}
               </div>
               {errors.general && <span className="error-msg block mb-2 text-center">{errors.general}</span>}
-              <button className="themed-btn w-full mt-2" type="submit">Login</button>
+              <button className="themed-btn w-full mt-2" type="submit" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login'}
+              </button>
             </form>
             <div className="flex justify-between mt-8 text-sm">
               <Link to="/register" className="text-indigo-600 hover:underline">Register</Link>
@@ -285,4 +308,4 @@ const AuthLogin = () => {
   );
 };
 
-export default AuthLogin; 
+export default AuthLogin;

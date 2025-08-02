@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const AppNavbar = () => {
-  // Simulate authentication state and user name
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName] = useState("Priya");
+  const navigate = useNavigate();
+  const { isLoggedIn, user, logout } = useAuth();
+  const userName = user ? user.name : "";
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -82,15 +83,17 @@ const AppNavbar = () => {
             </NavLink>
           </nav>
           <div className="navbar-actions">
-            <NavLink
-              to="/my-profile"
-              className={({ isActive }) =>
-                "navbar-link hide-on-mobile" +
-                (isActive ? " navbar-link-active" : "")
-              }
-            >
-              Profile
-            </NavLink>
+            {/* {isLoggedIn && (
+              <NavLink
+                to={user && user.isPerformer ? "/artist/profile" : "/my-profile"}
+                className={({ isActive }) =>
+                  "navbar-link hide-on-mobile" +
+                  (isActive ? " navbar-link-active" : "")
+                }
+              >
+                Profile
+              </NavLink>
+            )} */}
             {isLoggedIn ? (
               <div className="relative group">
                 <button className="navbar-user-btn" onClick={toggleDropdown}>
@@ -112,14 +115,19 @@ const AppNavbar = () => {
                 {dropdownOpen && (
                   <div className="user-dropdown">
                     <Link
-                      to="/profile"
+                      to={user && user.isPerformer ? "/artist/profile" : "/my-profile"}
                       className="block px-4 py-2 text-gray-700 hover:bg-indigo-100"
+                      onClick={() => setDropdownOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-rose-100"
-                      onClick={() => setIsLoggedIn(false)}
+                      onClick={() => {
+                        logout();
+                        setDropdownOpen(false);
+                        navigate('/');
+                      }}
                     >
                       Logout
                     </button>
@@ -230,8 +238,9 @@ const AppNavbar = () => {
                     <button
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-rose-100"
                       onClick={() => {
-                        setIsLoggedIn(false);
+                        logout();
                         closeMenu();
+                        navigate('/');
                       }}
                     >
                       Logout
