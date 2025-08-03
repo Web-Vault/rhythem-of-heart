@@ -6,6 +6,11 @@ const eventBookingSchema = new mongoose.Schema({
         ref: "Event",
         required: true,
     },
+    user: {  // Add this field
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
     ticketId: {
         type: String,
         required: true,

@@ -1,25 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaPhone, FaUsers, FaMicrophone, FaClock, FaEdit, FaTrash, FaQrcode, FaCreditCard } from "react-icons/fa";
+import { getEventById } from "../../services/eventService";
+import { createBooking } from "../../services/bookingService";
+import { useAuth } from "../../context/AuthContext";
 
 const TicketRegistration = () => {
-  const { type } = useParams(); // 'audience' or 'performer'
+  const { type, id } = useParams(); // 'audience' or 'performer', event id
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get user data from AuthContext
+
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const data = await getEventById(id);
+        setEvent(data.event);
+      } catch (err) {
+        setError(err.message || "Failed to fetch event");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvent();
+  }, [id]);
   
   // Audience form state
   const [audienceForm, setAudienceForm] = useState({
-    userName: '',
-    email: '',
-    mobile: '',
+    userName: user?.name || '',
+    email: user?.email || '',
+    mobile: user?.mobileNumber || '',
     numberOfPeople: 1,
-    peopleNames: ['']
+    peopleNames: [user?.name || '']
   });
 
   // Performer form state
   const [performerForm, setPerformerForm] = useState({
-    userName: '',
-    email: '',
-    mobile: '',
+    userName: user?.name || '',
+    email: user?.email || '',
+    mobile: user?.mobileNumber || '',
     artType: '',
     duration: ''
   });
@@ -29,15 +51,7 @@ const TicketRegistration = () => {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [editingSeats, setEditingSeats] = useState(false);
 
-  // Mock event data
-  const event = {
-    name: "Poetry Night Extravaganza",
-    price: 299,
-    totalSeats: 100,
-    bookedSeats: 42
-  };
 
-  const availableSeats = event.totalSeats - event.bookedSeats;
 
   // Audience form handlers
   const handleAudienceInputChange = (field, value) => {
@@ -103,9 +117,10 @@ const TicketRegistration = () => {
     }));
   };
 
-  // Calculate totals
-  const audienceTotal = audienceForm.numberOfPeople * event.price;
-  const performerTotal = event.price; // Performer pays same as audience
+  // Calculate totals and available seats
+  const audienceTotal = audienceForm.numberOfPeople * (event?.price || 0);
+  const performerTotal = event?.price || 0; // Performer pays same as audience
+  const availableSeats = event ? event.totalSeats - event.bookedSeats : 0;
 
   // Form validation
   const isAudienceFormValid = () => {
@@ -132,8 +147,24 @@ const TicketRegistration = () => {
     }
   };
 
-  const handlePay = () => {
-    setShowQR(true);
+  const handlePay = async () => {
+    try {
+      const bookingData = {
+        event: id,
+        username: type === "audience" ? audienceForm.userName : performerForm.userName,
+        email: type === "audience" ? audienceForm.email : performerForm.email,
+        mobileNumber: type === "audience" ? audienceForm.mobile : performerForm.mobile,
+        numberOfSeats: type === "audience" ? audienceForm.numberOfPeople : 1,
+        membersName: type === "audience" ? audienceForm.peopleNames : [],
+        isPerformer: type === "performer",
+        artType: type === "performer" ? performerForm.artType : undefined,
+        duration: type === "performer" ? performerForm.duration : undefined
+      };
+      await createBooking(bookingData);
+      navigate("/my-profile");
+    } catch (err) {
+      alert(err.message || "Booking failed");
+    }
   };
 
   const handleEditSeats = () => {
@@ -146,8 +177,20 @@ const TicketRegistration = () => {
   };
 
   const handleBackToEvent = () => {
-    navigate('/events/1');
+    navigate(-1);
   };
+
+  // Loading and error handling for fetched event
+  if (loading) {
+    return <div className="text-center py-20">Loading event...</div>;
+  }
+  if (error) {
+    return <div className="text-center py-20 text-red-600">{error}</div>;
+  }
+  if (!event) {
+    return <div className="text-center py-20">Event not found</div>;
+  }
+
 
   return (
     <div className="ticket-registration-container">
@@ -797,4 +840,4 @@ const TicketRegistration = () => {
   );
 };
 
-export default TicketRegistration; 
+export default TicketRegistration;

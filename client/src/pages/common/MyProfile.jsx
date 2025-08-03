@@ -149,23 +149,24 @@ const MyProfile = () => {
           <div className="ticket-history-list grid grid-cols-1 md:grid-cols-2 gap-8">
             {tickets.map((ticket) => (
               <div key={ticket._id} className="ticket-card group flex flex-col md:flex-row items-center gap-6 bg-gradient-to-br from-white via-indigo-50 to-indigo-100 border border-[#e0e7ff] rounded-2xl shadow p-6 hover:shadow-lg transition-all">
-                <img src={ticket.event.coverImage || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"} 
-                     alt={ticket.event.title} 
+                <img src={ticket.event.image || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"}
+                     alt={ticket.event.name}
                      className="ticket-event-cover w-32 h-24 object-cover rounded-xl border border-indigo-100 shadow" />
                 <div className="flex-1 w-full">
-                  <div className="ticket-event-name text-lg font-bold text-indigo-800 mb-1">{ticket.event.title}</div>
+                  <div className="ticket-event-name text-lg font-bold text-indigo-800 mb-1">{ticket.event.name}</div>
                   <div className="ticket-event-info text-gray-700 mb-1">
-                    <span className="font-medium">Date:</span> {format(new Date(ticket.event.date), 'dd MMM yyyy')} &nbsp;|&nbsp;
-                    <span className="font-medium">Time:</span> {format(new Date(ticket.event.date), 'h:mm a')}
+                    <span className="font-medium">Date:</span> {format(new Date(ticket.event.dateTime), 'dd MMM yyyy')} &nbsp;|&nbsp;
+                    <span className="font-medium">Time:</span> {format(new Date(ticket.event.dateTime), 'h:mm a')}
                   </div>
                   <div className="ticket-event-info text-gray-700 mb-1">
                     <span className="font-medium">Venue:</span> {ticket.event.venue}
                   </div>
                   <div className="ticket-event-info text-gray-700 mb-1">
-                    <span className="font-medium">Seat:</span> {ticket.seatNumber || 'General'}
+                    <span className="font-medium">Seats:</span> {ticket.numberOfSeats} &nbsp;|&nbsp;Attendees: {ticket.membersName?.join(', ')}
                   </div>
                   <div className="ticket-event-info text-gray-500 text-sm mb-2">
-                    <span className="font-medium">Ticket ID:</span> {ticket._id} &nbsp;|&nbsp;
+                    <span className="font-medium">Ticket ID:</span> {ticket.ticketId} &nbsp;|&nbsp;
+                    <br />
                     <span className="font-medium">Purchased:</span> {format(new Date(ticket.createdAt), 'dd MMM yyyy')}
                   </div>
                   <button className="btn-secondary px-6 py-2 mt-2" onClick={() => handleDownload(ticket._id)}>Download Ticket</button>

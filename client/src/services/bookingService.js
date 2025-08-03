@@ -25,6 +25,7 @@ api.interceptors.request.use(
 export const getUserBookings = async () => {
   try {
     const response = await api.get('/user');
+    console.log('User Bookings Response:', response.data);
     return response.data;
   } catch (error) {
     throw error.response?.data || { success: false, message: 'Failed to fetch bookings' };
@@ -41,9 +42,19 @@ export const getEventBookings = async (eventId) => {
   }
 };
 
+export const createBooking = async (bookingData) => {
+  try {
+    const response = await api.post('/', bookingData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { success: false, message: 'Failed to create booking' };
+  }
+};
+
 const bookingService = {
   getUserBookings,
-  getEventBookings
+  getEventBookings,
+  createBooking
 };
 
 export default bookingService;

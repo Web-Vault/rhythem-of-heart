@@ -91,7 +91,7 @@ export const getUserBookings = async (req, res) => {
     try {
         const bookings = await EventBooking.find({ user: req.user._id })
             .populate('event', 'name dateTime venue image price');
-        
+        console.log('User Bookings:', bookings);
         res.status(200).json({
             success: true,
             count: bookings.length,

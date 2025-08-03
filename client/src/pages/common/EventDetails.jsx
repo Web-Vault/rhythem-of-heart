@@ -27,12 +27,12 @@ const EventDetails = () => {
   }, [id]);
 
   const handleRegisterAsAudience = () => {
-    navigate('/register/audience');
+    navigate(`/register/audience/${id}`);
     setShowDropdown(false);
   };
 
   const handleRegisterAsPerformer = () => {
-    navigate('/register/performer');
+    navigate(`/register/performer/${id}`);
     setShowDropdown(false);
   };
 

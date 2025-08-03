@@ -29,7 +29,9 @@ import OtherArtistList from "./pages/artist/OtherArtistList";
 function AppRoutes() {
   const location = useLocation();
   const isArtistDashboard = location.pathname.startsWith("/artist/");
-  const hideNavbar = isArtistDashboard || location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/onboarding" || location.pathname === "/email-verification";
+  const hideNavbar = isArtistDashboard
+    || location.pathname.startsWith("/register")
+    || ["/login", "/onboarding", "/email-verification"].includes(location.pathname);
   return (
     <>
       {!hideNavbar && <AppNavbar />}
@@ -45,7 +47,7 @@ function AppRoutes() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/email-verification" element={<EmailVerification />} />
         <Route path="/events/:id" element={<EventDetails />} />
-        <Route path="/register/:type" element={<TicketRegistration />} />
+        <Route path="/register/:type/:id" element={<TicketRegistration />} />
         {/* Artist pages */}
         <Route path="/artist/home" element={<ProtectedRoute requiresPerformer={true}><ArtistHome /></ProtectedRoute>} />
         {/* <Route path="/artist/events" element={<ArtistEvents />} /> */}
