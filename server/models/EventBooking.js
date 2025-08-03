@@ -44,6 +44,9 @@ const eventBookingSchema = new mongoose.Schema({
     },
     duration: {
         type: Number,
+        default: 5,
+        max: 5,
+        min: 5,
     },
     totalAmount: {
         type: Number,

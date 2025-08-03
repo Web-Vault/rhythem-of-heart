@@ -145,6 +145,55 @@ export const getUserById = async (req, res) => {
     }
 };
 
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+export const updateUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        
+        if (user) {
+            user.name = req.body.name || user.name;
+            user.email = req.body.email || user.email;
+            user.mobileNumber = req.body.mobileNumber || user.mobileNumber;
+            user.isPerformer = req.body.isPerformer || user.isPerformer;
+            
+            // Update performer-specific fields if they exist in request
+            if (user.isPerformer) {
+                user.profileTags = req.body.profileTags || user.profileTags;
+                user.oneLineDesc = req.body.oneLineDesc || user.oneLineDesc;
+                user.workDescription = req.body.workDescription || user.workDescription;
+                user.profilePhoto = req.body.profilePhoto || user.profilePhoto;
+                user.isSampleAdded = req.body.isSampleAdded || user.isSampleAdded;
+                user.sample = req.body.sample || user.sample;
+            }
+
+            const updatedUser = await user.save();
+            res.status(200).json({
+                success: true,
+                user: {
+                    _id: updatedUser._id,
+                    name: updatedUser.name,
+                    email: updatedUser.email,
+                    mobileNumber: updatedUser.mobileNumber,
+                    isPerformer: updatedUser.isPerformer,
+                    profileTags: updatedUser.profileTags,
+                    oneLineDesc: updatedUser.oneLineDesc,
+                    workDescription: updatedUser.workDescription,
+                    profilePhoto: updatedUser.profilePhoto,
+                    isSampleAdded: updatedUser.isSampleAdded,
+                    sample: updatedUser.sample
+                }
+            });
+        } else {
+            res.status(404).json({ success: false, message: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
 // Generate JWT
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret_key_for_development', {

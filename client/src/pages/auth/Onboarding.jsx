@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { updateUserProfile } from "../../services/userService";
+import { useAuth } from "../../context/AuthContext";
 
 const MAX_TAGS = 3;
 const steps = [
@@ -32,6 +34,7 @@ const steps = [
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const { updateAuthState } = useAuth();
   const [step, setStep] = useState(0);
   const [lastAnimatedStep, setLastAnimatedStep] = useState(0);
   const [animating, setAnimating] = useState(false);
@@ -117,11 +120,29 @@ const Onboarding = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep()) return;
-    // Simulate onboarding complete
-    navigate("/artist/123"); // Replace with actual artist profile route
+
+    try {
+      const userData = {
+        profileTags: tags,
+        oneLineDesc: bio,
+        workDescription: workHistory,
+        profilePhoto: image ? URL.createObjectURL(image) : undefined,
+        isSampleAdded: !!poetry,
+        sample: poetry
+      };
+
+      await updateUserProfile(userData);
+      updateAuthState(); // Update the auth context with new user data
+      navigate("/my-profile");
+    } catch (error) {
+      setErrors({
+        ...errors,
+        general: error.message || "Failed to complete onboarding"
+      });
+    }
   };
 
   // Progress bar with animation
@@ -417,4 +438,4 @@ const Onboarding = () => {
   );
 };
 
-export default Onboarding; 
+export default Onboarding;

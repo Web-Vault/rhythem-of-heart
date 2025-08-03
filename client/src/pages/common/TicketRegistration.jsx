@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaPhone, FaUsers, FaMicrophone, FaClock, FaEdit, FaTrash, FaQrcode, FaCreditCard } from "react-icons/fa";
 import { getEventById } from "../../services/eventService";
-import { createBooking } from "../../services/bookingService";
+import { createBooking, getUserBookings } from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
 
 const TicketRegistration = () => {
@@ -13,21 +13,61 @@ const TicketRegistration = () => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [existingBooking, setExistingBooking] = useState(null);
+  const [countdown, setCountdown] = useState(null);
 
+  // Separate useEffect for data fetching
   useEffect(() => {
-    const fetchEvent = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getEventById(id);
-        setEvent(data.event);
+        const [eventData, bookingsData] = await Promise.all([
+          getEventById(id),
+          getUserBookings()
+        ]);
+        setEvent(eventData.event);
+        
+        // Check if user already has a booking for this event
+        const existingBooking = bookingsData.bookings.find(booking => 
+          booking.event._id === id
+        );
+        setExistingBooking(existingBooking);
+
+        if (existingBooking) {
+          if (type === 'performer' && !existingBooking.isPerformer) {
+            setError('You have already registered as an audience for this event');
+          } else if (type === 'audience' && existingBooking.isPerformer) {
+            setError('You have already registered as a performer for this event');
+          }
+        }
       } catch (err) {
-        setError(err.message || "Failed to fetch event");
+        setError(err.message || "Failed to fetch data");
       } finally {
         setLoading(false);
       }
     };
-    fetchEvent();
-  }, [id]);
-  
+    fetchData();
+  }, [id, type]);
+
+  // Separate useEffect for error countdown
+  useEffect(() => {
+    let timer;
+    if (error) {
+      setCountdown(5);
+      timer = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            navigate('/my-profile');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [error, navigate]);
   // Audience form state
   const [audienceForm, setAudienceForm] = useState({
     userName: user?.name || '',
@@ -184,13 +224,10 @@ const TicketRegistration = () => {
   if (loading) {
     return <div className="text-center py-20">Loading event...</div>;
   }
-  if (error) {
-    return <div className="text-center py-20 text-red-600">{error}</div>;
-  }
+
   if (!event) {
     return <div className="text-center py-20">Event not found</div>;
   }
-
 
   return (
     <div className="ticket-registration-container">
@@ -199,6 +236,16 @@ const TicketRegistration = () => {
         <button onClick={handleBackToEvent} className="back-btn">
           ← Back to Event
         </button>
+        {error && (
+          <div className="error-container bg-red-50 border border-red-200 rounded-lg p-4 my-4">
+            <div className="text-red-600 text-center font-medium mb-2">{error}</div>
+            {countdown && (
+              <div className="text-gray-600 text-center text-sm">
+                Redirecting to profile page in {countdown} seconds...
+              </div>
+            )}
+          </div>
+        )}
         <h1 className="registration-title">
           {type === 'audience' ? 'Audience Registration' : 'Performer Registration'}
         </h1>
@@ -402,13 +449,14 @@ const TicketRegistration = () => {
                     </select>
                   </div>
                   <div className="form-group">
-                    <label><FaClock /> Duration (Approximate)</label>
+                    <label><FaClock /> Duration (In Minutes)</label>
                     <input
                       type="text"
                       value={performerForm.duration}
                       onChange={(e) => handlePerformerInputChange('duration', e.target.value)}
                       placeholder="e.g., 10 minutes, 15-20 minutes"
                     />
+                    <small className="text-sm text-gray-500 ml-1">maximum time for performance is 5 minutes.</small>
                   </div>
                 </div>
 
@@ -835,6 +883,18 @@ const TicketRegistration = () => {
             font-size: 2rem;
           }
         }
+
+        
+.error-container {
+  max-width: 600px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
       `}</style>
     </div>
   );
