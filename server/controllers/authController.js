@@ -108,6 +108,43 @@ export const getUserProfile = async (req, res) => {
     }
 };
 
+// @desc    Get all performers
+// @route   GET /api/auth/performers
+// @access  Public
+export const getAllPerformers = async (req, res) => {
+    try {
+        const performers = await User.find({ isPerformer: true });
+        
+        res.status(200).json({
+            success: true,
+            performers
+        });
+    } catch (error) {
+        console.error('Get performers error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Get user by ID
+// @route   GET /api/auth/users/:id
+// @access  Public
+export const getUserById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('-password');
+        if (user) {
+            res.status(200).json({
+                success: true,
+                user
+            });
+        } else {
+            res.status(404).json({ success: false, message: 'User not found' });
+        }
+    } catch (error) {
+        console.error('Get user error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
 // Generate JWT
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret_key_for_development', {

@@ -1,55 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { FaCalendarAlt, FaMapMarkerAlt, FaChair, FaUser, FaRupeeSign, FaTicketAlt, FaArrowRight, FaUsers, FaMicrophone } from "react-icons/fa";
-
-// Mock event data
-const event = {
-  id: 1,
-  name: "Poetry Night Extravaganza",
-  coverImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
-  description:
-    "Join us for a magical evening of poetry, music, and art. Experience performances by renowned poets and artists from Rajkot and beyond. Refreshments included!",
-  date: "2024-07-12",
-  time: "7:00 PM",
-  venue: "Rajkot Auditorium, Main Hall",
-  performers: [
-    { name: "Amit Joshi", role: "Poet", avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
-    { name: "Priya Shah", role: "Singer", avatar: "https://randomuser.me/api/portraits/women/44.jpg" },
-    { name: "Rahul Mehta", role: "Poet", avatar: "https://randomuser.me/api/portraits/men/65.jpg" },
-  ],
-  totalSeats: 100,
-  bookedSeats: 42,
-  price: 299,
-};
-
-const otherEvents = [
-  {
-    id: 2,
-    name: "Open Mic Night",
-    coverImage:
-      "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80",
-    date: "2024-07-20",
-    time: "6:30 PM",
-    venue: "Rajkot Cafe Arena",
-  },
-  {
-    id: 3,
-    name: "Gujarati Shayari Evening",
-    coverImage:
-      "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80",
-    date: "2024-08-05",
-    time: "8:00 PM",
-    venue: "Heritage Hall",
-  },
-];
+import { getEventById } from "../../services/eventService";
+import { format } from "date-fns";
 
 const EventDetails = () => {
-  // const { id } = useParams(); // For real data fetching
+  const { id } = useParams();
   const navigate = useNavigate();
-  const availableSeats = event.totalSeats - event.bookedSeats;
-  const bookedPercent = Math.round((event.bookedSeats / event.totalSeats) * 100);
-  
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    const fetchEventDetails = async () => {
+      try {
+        const data = await getEventById(id);
+        setEvent(data.event);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch event details');
+        setLoading(false);
+      }
+    };
+    fetchEventDetails();
+  }, [id]);
 
   const handleRegisterAsAudience = () => {
     navigate('/register/audience');
@@ -61,11 +36,28 @@ const EventDetails = () => {
     setShowDropdown(false);
   };
 
+  if (loading) {
+    return <div className="text-center py-20">Loading event details...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-20 text-red-600">{error}</div>;
+  }
+
+  if (!event) {
+    return <div className="text-center py-20">Event not found</div>;
+  }
+
+  const availableSeats = event.totalSeats - event.bookedSeats;
+  const bookedPercent = Math.round((event.bookedSeats / event.totalSeats) * 100);
+
   return (
     <div className="eventdetails-fullscreen-refined">
       {/* HERO SECTION */}
       <div className="eventdetails-hero">
-        <img src={event.coverImage} alt={event.name} className="eventdetails-hero-img" />
+        <img src={event.image || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80"} 
+             alt={event.name} 
+             className="eventdetails-hero-img" />
         <div className="eventdetails-hero-overlay"></div>
         <div className="eventdetails-hero-content">
           <div className="eventdetails-hero-title-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
@@ -73,7 +65,7 @@ const EventDetails = () => {
             <div className="eventdetails-hero-underline" style={{ marginLeft: 0, marginRight: 0 }}></div>
           </div>
           <div className="eventdetails-hero-meta">
-            <span><FaCalendarAlt /> {event.date}, {event.time}</span>
+            <span><FaCalendarAlt /> {format(new Date(event.dateTime), 'dd MMM yyyy, h:mm a')}</span>
             <span><FaMapMarkerAlt /> {event.venue}</span>
           </div>
         </div>
@@ -86,11 +78,13 @@ const EventDetails = () => {
           <div className="eventdetails-info-left">
             <p className="eventdetails-info-desc">{event.description}</p>
             <div className="eventdetails-performers-row">
-              {event.performers.map((p, idx) => (
+              {event.performers.map((performer, idx) => (
                 <div key={idx} className="eventdetails-performer-avatar-wrap">
-                  <img src={p.avatar} alt={p.name} className="eventdetails-performer-avatar" />
-                  <div className="eventdetails-performer-name">{p.name}</div>
-                  <div className="eventdetails-performer-role">{p.role}</div>
+                  <img src={performer.profilePhoto || `https://randomuser.me/api/portraits/${performer.gender === 'female' ? 'women' : 'men'}/${(idx + 1) * 11}.jpg`} 
+                       alt={performer.name} 
+                       className="eventdetails-performer-avatar" />
+                  <div className="eventdetails-performer-name">{performer.name}</div>
+                  <div className="eventdetails-performer-role">Performer</div>
                 </div>
               ))}
             </div>
@@ -651,13 +645,14 @@ const EventDetails = () => {
           gap: 1rem;
         }
         .event-tile-details-btn:hover, .event-tile-details-btn:focus {
-          background: linear-gradient(90deg, #818cf8 60%, #6366f1 100%);
-          box-shadow: 0 12px 40px #6366f144, 0 4px 24px #6366f122;
+          color: #e0e7ff;
+          box-shadow: 0 4px 16px #6366f133;
           transform: translateY(-2px) scale(1.04);
         }
       `}</style>
-    </div>
-  );
+
+</div>
+    );
 };
 
 export default EventDetails;

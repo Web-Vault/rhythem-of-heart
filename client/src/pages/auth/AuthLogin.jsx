@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
+import { useAuth } from '../../context/AuthContext';
 const letterPool = [
   { char: 'અ' }, // Gujarati
   { char: 'क' }, // Hindi
@@ -36,6 +36,7 @@ const AuthLogin = () => {
   const [errors, setErrors] = useState({ email: '', password: '', general: '' });
   // Dummy: toggle this to test artist/normal user redirection
   const isArtist = false;
+  const { updateAuthState } = useAuth();
 
   // Memoize so the letters don't change on every render
   const floatingLetters = useMemo(() => getRandomLetters(letterPool, 16), []);
@@ -76,6 +77,7 @@ const AuthLogin = () => {
       const response = await login(email, password);
       
       if (response.success) {
+        updateAuthState();
         // Check if user is an artist to redirect appropriately
         if (response.user.isPerformer) {
           navigate('/artist/home');
@@ -107,7 +109,7 @@ const AuthLogin = () => {
           <div className="auth-logo-big flex items-center justify-center rounded-2xl bg-white/10 shadow-lg mb-6">
             <span className="text-5xl font-extrabold">V</span>
           </div>
-          <h1 className="text-3xl font-bold mb-2 tracking-wide">Voice of Rajkot</h1>
+          <h1 className="text-3xl font-bold mb-2 tracking-wide">rhythm of heart</h1>
           <p className="text-lg font-medium mb-8 opacity-90">Where Rajkot speaks, artists shine.</p>
         </div>
         <div className="absolute bottom-8 left-0 w-full flex justify-center opacity-30">

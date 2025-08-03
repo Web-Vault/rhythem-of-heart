@@ -1,7 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaCalendarAlt, FaTicketAlt, FaStar } from "react-icons/fa";
+import { FaUser, FaCalendarAlt, FaTicketAlt, FaStar, FaMapMarkerAlt, FaChair, FaArrowRight } from "react-icons/fa";
 import { FaQuoteLeft } from 'react-icons/fa';
+import { format } from 'date-fns';
+import { getAllEvents } from "../../services/eventService";
 // FontAwesome icons (using CDN, so just use <i> tags as in Vue)
 
 const letterPool = [
@@ -91,6 +93,29 @@ const howItWorksSteps = [
 ];
 
 const AppHome = () => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await getAllEvents();
+        // Sort events by date and get the 3 most recent upcoming events
+        const upcomingEvents = data
+          .filter(event => new Date(event.dateTime) > new Date())
+          .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+          .slice(0, 3);
+        setEvents(upcomingEvents);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch events');
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
+
   // Memoize so the letters don't change on every render
   const floatingLetters = useMemo(() => getRandomLetters(letterPool, 24), []);
 
@@ -118,7 +143,7 @@ const AppHome = () => {
             </h1>
             <p className="hero-subtext">
               Discover exceptional poetry events, connect with talented poets,
-              and immerse yourself in the beauty of words. The Voice of Rajkot
+              and immerse yourself in the beauty of words. The rhythm of heart
               platform brings poetry enthusiasts together.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-8">
@@ -177,56 +202,50 @@ const AppHome = () => {
         <div className="events-tile-header-divider"></div>
         <div className="events-tile-carousel-wrap relative">
           <div className="events-tile-carousel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-6xl px-4 md:px-0">
-            {[1, 2, 3].map((i) => (
+            {events.map((event) => (
               <div
-                key={i}
+                key={event._id}
                 className="event-tile-item group relative w-full"
               >
                 <div className="event-tile-img-wrap relative">
-                  {/* <div className="event-tile-accent-bar"></div> */}
                   <img
-                    src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-                    alt="Event"
+                    src={event.coverImage || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"}
+                    alt={event.name}
                     className="event-tile-img event-tile-img-taller"
                   />
                   <div className="event-tile-img-fade-short"></div>
                   <div className="event-tile-date-badge">
-                    <i className="fa fa-calendar mr-1"></i> 12 July 2024, 7:00
-                    PM
+                    <FaCalendarAlt className="mr-1" /> {format(new Date(event.dateTime), 'dd MMM yyyy, h:mm a')}
                   </div>
-                  <div className="event-tile-img-title">Poetry Night {i}</div>
+                  <div className="event-tile-img-title">{event.name}</div>
                 </div>
                 <div className="event-tile-content event-tile-content-gradient rounded-b-[16px] px-7 pt-4 pb-6 flex flex-col gap-3 relative border border-[#e0e7ff]">
-                  <p className="event-tile-desc mb-2">
-                    A magical evening of poetry and music. Join us for an
-                    unforgettable experience with renowned poets and artists
-                    from Rajkot and beyond.
-                  </p>
+                  <p className="event-tile-desc mb-2">{event.description}</p>
                   <div className="event-tile-meta flex items-center gap-6 text-xs text-gray-500 mt-1 mb-2">
                     <span className="flex items-center gap-1">
-                      <i className="fa fa-map-marker-alt"></i> Rajkot Auditorium
+                      <FaMapMarkerAlt /> {event.venue}
                     </span>
                     <span className="flex items-center gap-1">
-                      <i className="fa fa-chair"></i> 42 / 100 seats
+                      <FaChair /> {event.bookedSeats} / {event.totalSeats} seats
                     </span>
                   </div>
                   <div className="event-tile-progress-wrap mt-2 mb-3">
                     <div className="event-tile-progress-bg">
                       <div
                         className="event-tile-progress-fill"
-                        style={{ width: "42%" }}
+                        style={{ width: `${Math.round((event.bookedSeats / event.totalSeats) * 100)}%` }}
                       ></div>
                     </div>
                     <span className="event-tile-progress-label">
-                      42% booked
+                      {Math.round((event.bookedSeats / event.totalSeats) * 100)}% booked
                     </span>
                   </div>
                   <Link
-                    to={`/events/1`}
+                    to={`/events/${event._id}`}
                     className="event-tile-details-btn-wrap mt-2"
                   >
                     <button className="event-tile-details-btn w-full flex items-center justify-center gap-2">
-                      More Details <i className="fa fa-arrow-right"></i>
+                      More Details <FaArrowRight />
                     </button>
                   </Link>
                 </div>
@@ -781,19 +800,22 @@ const AppHome = () => {
 }
 
 .event-tile-date-badge {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: rgba(255,255,255,0.82);
-  color: #3730a3;
-  font-size: 0.98rem;
-  font-weight: 600;
-  padding: 0.28rem 1rem;
-  border-radius: 0.9rem;
-  box-shadow: 0 2px 8px #6366f122;
-  z-index: 2;
-  pointer-events: none;
-  border: 1.2px solid #e0e7ff;
+        display: flex; 
+        align-items:center;
+        gap: 10px;
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: rgba(255,255,255,0.82);
+        color: #3730a3;
+        font-size: 0.98rem;
+        font-weight: 600;
+        padding: 0.28rem 1rem;
+        border-radius: 0.9rem;
+        box-shadow: 0 2px 8px #6366f122;
+        z-index: 2;
+         pointer-events: none;
+         border: 1.2px solid #e0e7ff;
 }
 
 .event-tile-content-gradient {

@@ -1,10 +1,27 @@
 {
   "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node seeders/seedAll.js",
+    "seed:users": "node seeders/userSeeder.js",
+    "seed:events": "node seeders/eventSeeder.js",
+    "seed:posts": "node seeders/postSeeder.js",
+    "seed:bookings": "node seeders/bookingSeeder.js",
+    "seed:destroy": "node seeders/userSeeder.js -d && node seeders/eventSeeder.js -d && node seeders/postSeeder.js -d && node seeders/bookingSeeder.js -d"
+  },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

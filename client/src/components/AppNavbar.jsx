@@ -36,10 +36,10 @@ const AppNavbar = () => {
                 className="navbar-logo flex items-center justify-center text-white font-extrabold text-2xl rounded-full bg-indigo-600 shadow-md"
                 style={{ width: "2.5rem", height: "2.5rem" }}
               >
-                V
+                R
               </span>
               <span className="navbar-title font-semibold text-lg tracking-wide text-indigo-800">
-                Voice of Rajkot
+                rhythm of heart
               </span>
             </Link>
           </div>
@@ -176,8 +176,8 @@ const AppNavbar = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="navbar-mobile-header">
-                <span className="navbar-logo">V</span>
-                <span className="navbar-title">Voice of Rajkot</span>
+                <span className="navbar-logo">R</span>
+                <span className="navbar-title">rhythm of heart</span>
                 <button
                   className="navbar-mobile-close"
                   onClick={closeMenu}
@@ -228,13 +228,6 @@ const AppNavbar = () => {
               <div className="navbar-mobile-user mt-6">
                 {isLoggedIn ? (
                   <>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-gray-700 hover:bg-indigo-100"
-                      onClick={closeMenu}
-                    >
-                      Profile
-                    </Link>
                     <button
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-rose-100"
                       onClick={() => {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FaCalendarAlt,
@@ -6,8 +6,36 @@ import {
   FaChair,
   FaArrowRight,
 } from "react-icons/fa";
+import { getAllEvents } from "../../services/eventService";
+import { format } from "date-fns";
 
 const AppEvents = () => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await getAllEvents();
+        setEvents(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch events');
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-20">Loading events...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-20 text-red-600">{error}</div>;
+  }
+
   return (
     <>
       {/* UPCOMING EVENTS SECTION */}
@@ -27,50 +55,46 @@ const AppEvents = () => {
         <div className="events-tile-header-divider"></div>
         <div className="events-tile-carousel-wrap relative">
           <div className="events-tile-carousel grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 mx-auto max-w-6xl px-4 md:px-0">
-            {[1, 2, 3].map((i) => (
+            {events.map((event) => (
               <div
-                key={i}
+                key={event._id}
                 className="event-tile-item group relative w-full"
               >
                 <div className="event-tile-img-wrap relative">
                   <img
-                    src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
-                    alt="Event"
+                    src={event.coverImage || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"}
+                    alt={event.title}
                     className="event-tile-img event-tile-img-taller"
                   />
                   <div className="event-tile-img-fade-short"></div>
                   <div className="event-tile-date-badge">
-                    <FaCalendarAlt className="mr-1" /> 12 July 2024, 7:00 PM
+                    <FaCalendarAlt className="mr-1" /> {format(new Date(event.dateTime), 'dd MMM yyyy, h:mm a')}
                   </div>
-                  <div className="event-tile-img-title">Poetry Night {i}</div>
+                  <div className="event-tile-img-title">{event.name}</div>
                 </div>
                 <div className="event-tile-content event-tile-content-gradient rounded-b-[16px] px-7 pt-4 pb-6 flex flex-col gap-3 relative border border-[#e0e7ff]">
-                  <p className="event-tile-desc mb-2">
-                    A magical evening of poetry and music. Join us for an
-                    unforgettable experience with renowned poets and artists
-                    from Rajkot and beyond.
-                  </p>
+                  <p className="event-tile-desc mb-2">{event.description}</p>
                   <div className="event-tile-meta flex items-center gap-6 text-xs text-gray-500 mt-1 mb-2">
                     <span className="flex items-center gap-1">
-                      <FaMapMarkerAlt /> Rajkot Auditorium
+                      <FaMapMarkerAlt /> {event.venue}
                     </span>
                     <span className="flex items-center gap-1">
-                      <FaChair /> 42 / 100 seats
+                      <FaChair /> {event.bookedSeats} / {event.totalSeats} seats
                     </span>
                   </div>
                   <div className="event-tile-progress-wrap mt-2 mb-3">
                     <div className="event-tile-progress-bg">
                       <div
                         className="event-tile-progress-fill"
-                        style={{ width: "42%" }}
+                        style={{ width: `${(event.bookedSeats / event.totalSeats) * 100}%` }}
                       ></div>
                     </div>
                     <span className="event-tile-progress-label">
-                      42% booked
+                      {Math.round((event.bookedSeats / event.totalSeats) * 100)}% booked
                     </span>
                   </div>
                   <Link
-                    to={`/events/1`}
+                    to={`/events/${event._id}`}
                     className="event-tile-details-btn-wrap mt-2"
                   >
                     <button className="event-tile-details-btn w-full flex items-center justify-center gap-2">

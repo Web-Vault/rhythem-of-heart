@@ -1,75 +1,82 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaCheck, FaCamera } from 'react-icons/fa';
-
-const mockUser = {
-  name: 'Jay Patel',
-  email: 'jay.patel@email.com',
-  phone: '+91 98765 43210',
-  photo: 'https://randomuser.me/api/portraits/men/45.jpg',
-};
-
-const mockTickets = [
-  {
-    id: 'TCKT-20240101-001',
-    event: {
-      name: 'Rajkot Poetry Night',
-      date: '2024-02-10',
-      time: '7:00 PM',
-      venue: 'Rajkot Town Hall',
-      cover: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
-    },
-    seat: 'A12',
-    purchaseDate: '2024-01-20',
-  },
-  {
-    id: 'TCKT-20240101-002',
-    event: {
-      name: 'Gujarati Kavi Sammelan',
-      date: '2024-03-05',
-      time: '6:30 PM',
-      venue: 'Kala Kendra, Rajkot',
-      cover: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80',
-    },
-    seat: 'B7',
-    purchaseDate: '2024-02-15',
-  },
-  {
-    id: 'TCKT-20240101-003',
-    event: {
-      name: 'Open Mic Evening',
-      date: '2024-04-12',
-      time: '5:00 PM',
-      venue: 'Art Cafe, Rajkot',
-      cover: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=800&q=80',
-    },
-    seat: 'General',
-    purchaseDate: '2024-03-10',
-  },
-];
+import { format } from 'date-fns';
+import { getUserProfile, updateUserProfile } from '../../services/userService';
+import { getUserBookings } from '../../services/bookingService';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const MyProfile = () => {
-  const [user, setUser] = useState(mockUser);
-  const [form, setForm] = useState(user);
+  const { isLoggedIn, user: authUser, updateAuthState } = useAuth();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [form, setForm] = useState(null);
+  const [tickets, setTickets] = useState([]);
   const [photoHover, setPhotoHover] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const fileInputRef = useRef();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const [userData, bookingsData] = await Promise.all([
+          getUserProfile(),
+          getUserBookings()
+        ]);
+        setUser(userData);
+        setForm(userData);
+        setTickets(bookingsData.bookings || []);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch user data');
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [isLoggedIn, navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleSave = (e) => {
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    setUser(form);
+    try {
+      const updatedUser = await updateUserProfile(form);
+      setUser(updatedUser);
+      alert('Profile updated successfully!');
+    } catch (err) {
+      alert(err.message || 'Failed to update profile');
+    }
   };
+
   const handlePhotoChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const url = URL.createObjectURL(file);
       setForm({ ...form, photo: url });
+      // TODO: Implement photo upload to server
     }
   };
+
   const handleDownload = (ticketId) => {
+    // TODO: Implement ticket download functionality
     alert(`Download for ticket ${ticketId}`);
   };
+
+  if (loading) {
+    return <div className="text-center py-20">Loading profile...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-20 text-red-600">{error}</div>;
+  }
 
   return (
     <section className="myprofile-section">
@@ -140,26 +147,28 @@ const MyProfile = () => {
             <div className="ticket-history-subheading">All your event tickets, with download options.</div>
           </div>
           <div className="ticket-history-list grid grid-cols-1 md:grid-cols-2 gap-8">
-            {mockTickets.map((ticket) => (
-              <div key={ticket.id} className="ticket-card group flex flex-col md:flex-row items-center gap-6 bg-gradient-to-br from-white via-indigo-50 to-indigo-100 border border-[#e0e7ff] rounded-2xl shadow p-6 hover:shadow-lg transition-all">
-                <img src={ticket.event.cover} alt={ticket.event.name} className="ticket-event-cover w-32 h-24 object-cover rounded-xl border border-indigo-100 shadow" />
+            {tickets.map((ticket) => (
+              <div key={ticket._id} className="ticket-card group flex flex-col md:flex-row items-center gap-6 bg-gradient-to-br from-white via-indigo-50 to-indigo-100 border border-[#e0e7ff] rounded-2xl shadow p-6 hover:shadow-lg transition-all">
+                <img src={ticket.event.coverImage || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"} 
+                     alt={ticket.event.title} 
+                     className="ticket-event-cover w-32 h-24 object-cover rounded-xl border border-indigo-100 shadow" />
                 <div className="flex-1 w-full">
-                  <div className="ticket-event-name text-lg font-bold text-indigo-800 mb-1">{ticket.event.name}</div>
+                  <div className="ticket-event-name text-lg font-bold text-indigo-800 mb-1">{ticket.event.title}</div>
                   <div className="ticket-event-info text-gray-700 mb-1">
-                    <span className="font-medium">Date:</span> {ticket.event.date} &nbsp;|&nbsp;
-                    <span className="font-medium">Time:</span> {ticket.event.time}
+                    <span className="font-medium">Date:</span> {format(new Date(ticket.event.date), 'dd MMM yyyy')} &nbsp;|&nbsp;
+                    <span className="font-medium">Time:</span> {format(new Date(ticket.event.date), 'h:mm a')}
                   </div>
                   <div className="ticket-event-info text-gray-700 mb-1">
                     <span className="font-medium">Venue:</span> {ticket.event.venue}
                   </div>
                   <div className="ticket-event-info text-gray-700 mb-1">
-                    <span className="font-medium">Seat:</span> {ticket.seat}
+                    <span className="font-medium">Seat:</span> {ticket.seatNumber || 'General'}
                   </div>
                   <div className="ticket-event-info text-gray-500 text-sm mb-2">
-                    <span className="font-medium">Ticket ID:</span> {ticket.id} &nbsp;|&nbsp;
-                    <span className="font-medium">Purchased:</span> {ticket.purchaseDate}
+                    <span className="font-medium">Ticket ID:</span> {ticket._id} &nbsp;|&nbsp;
+                    <span className="font-medium">Purchased:</span> {format(new Date(ticket.createdAt), 'dd MMM yyyy')}
                   </div>
-                  <button className="btn-secondary px-6 py-2 mt-2" onClick={() => handleDownload(ticket.id)}>Download Ticket</button>
+                  <button className="btn-secondary px-6 py-2 mt-2" onClick={() => handleDownload(ticket._id)}>Download Ticket</button>
                 </div>
               </div>
             ))}
@@ -440,4 +449,4 @@ const MyProfile = () => {
   );
 };
 
-export default MyProfile; 
+export default MyProfile;
