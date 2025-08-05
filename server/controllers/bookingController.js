@@ -56,6 +56,16 @@ export const createBooking = async (req, res) => {
         eventData.bookedSeats += numberOfSeats;
         await eventData.save();
         
+        if (isPerformer) {
+            // Add performer to event if they are a performer
+            if (!eventData.performers.includes(req.user._id)) {
+                eventData.performers.push(req.user._id);
+            }
+        }
+        
+        eventData.performers.push(req.user._id);
+        await eventData.save();
+
         res.status(201).json({
             success: true,
             message: 'Booking created successfully',

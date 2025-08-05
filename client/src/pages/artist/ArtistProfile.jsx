@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getUserProfile } from "../../services/authService";
 import { Tab } from "@headlessui/react";
+import { useNavigate } from "react-router-dom";
 
 const ArtistProfile = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -13,6 +14,8 @@ const ArtistProfile = () => {
   const [editField, setEditField] = useState(null);
   const [editValue, setEditValue] = useState("");
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [refreshData, setRefreshData] = useState(0);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -23,28 +26,43 @@ const ArtistProfile = () => {
 
           // Fetch user's posts
           const postsResponse = await fetch(
-            `http://localhost:5000/api/posts/user/${response.user._id}`
+            `http://localhost:5000/api/posts/author/${response.user._id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+              },
+            }
           );
           const postsData = await postsResponse.json();
           setPosts(postsData.posts || []);
 
           // Fetch events where user is a performer
           const eventsResponse = await fetch(
-            `http://localhost:5000/api/events/performer/${response.user._id}`
+            `http://localhost:5000/api/events/performer/${response.user._id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+              },
+            }
           );
           const eventsData = await eventsResponse.json();
           setEvents(eventsData.events || []);
 
           // Fetch user's bookings
           const bookingsResponse = await fetch(
-            `http://localhost:5000/api/bookings/user/${response.user._id}`
+            `http://localhost:5000/api/bookings/user`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+              },
+            }
           );
           const bookingsData = await bookingsResponse.json();
           setBookings(bookingsData.bookings || []);
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
-        // Initialize empty arrays to prevent map errors
         setPosts([]);
         setEvents([]);
         setBookings([]);
@@ -52,10 +70,49 @@ const ArtistProfile = () => {
     };
 
     fetchProfileData();
-  }, []);
+  }, [refreshData]); // Add refreshData dependency
+
+  // Add like/dislike handlers
+  const handleLike = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+        },
+      });
+
+      if (response.ok) {
+        setRefreshData(prev => prev + 1); // Trigger data refresh
+      }
+    } catch (error) {
+      console.error("Error liking post:", error);
+    }
+  };
+
+  const handleDislike = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/unlike`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+        },
+      });
+
+      if (response.ok) {
+        setRefreshData(prev => prev + 1); // Trigger data refresh
+      }
+    } catch (error) {
+      console.error("Error unliking post:", error);
+    }
+  };
 
   const handleEditProfile = () => {
     setIsEditing(true);
+  };
+  
+  const handleExitDashoard = () => {
+    navigate("/");
   };
 
   const handleSaveProfile = async (updatedData) => {
@@ -129,6 +186,12 @@ const ArtistProfile = () => {
             className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
           >
             Edit Profile
+          </button>
+          <button
+            onClick={handleExitDashoard}
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Exit Dashboard
           </button>
         </div>
       </div>

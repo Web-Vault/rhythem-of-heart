@@ -240,47 +240,87 @@ POETRY
         </div>
       </div>
       */}
-{posts.count > 0 ? (
-        <div className="max-w-6xl mx-auto mt-10 px-4 md:px-0">
-          <h3 className="poetry-section-title">Poetry Collection</h3>
-          <div className="poetry-section-title-underline"></div>
-          <div className="poetry-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-8">
-            {posts.map((post) => (
-              <div
-                key={post._id}
-                className="featured-poem-card-pro group flex flex-col justify-between relative"
-              >
-                <span className="featured-poem-quote-icon-pro">
-                  <FaQuoteLeft />
-                </span>
-                <div className="featured-poem-phrase-pro mb-8">
-                  {post.content}
-                  <span className="featured-poem-underline-pro"></span>
-                </div>
-                <div className="featured-poem-divider-pro"></div>
-                <div className="featured-poem-author-row-pro flex items-center gap-3 mt-auto pt-4">
-                  <img
-                    className="featured-poem-author-img-pro"
-                    src={artist.photo}
-                    alt={artist.name}
-                  />
-                  <div className="flex flex-col">
-                    <span className="featured-poem-author-name-pro">
-                      {artist.name}
-                    </span>
-                    <span className="featured-poem-author-role-pro">
-                      {artist.profileTags?.join(" & ") || "Poet"}
-                    </span>
-                  </div>
-                  <span className="featured-poem-date-pro ml-auto text-xs text-gray-400 font-semibold">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            ))}
+{
+  /* Display Sample Poetry if available */}
+  {artist.isSampleAdded && artist.sample && (
+    <div className="max-w-6xl mx-auto mt-10 px-4 md:px-0">
+      <h3 className="poetry-section-title">Featured Sample</h3>
+      <div className="poetry-section-title-underline"></div>
+      <div className="poetry-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-8">
+        <div className="featured-poem-card-pro group flex flex-col justify-between relative">
+          <span className="featured-poem-quote-icon-pro">
+            <FaQuoteLeft />
+          </span>
+          <div className="featured-poem-phrase-pro mb-8">
+            {artist.sample}
+            <span className="featured-poem-underline-pro"></span>
+          </div>
+          <div className="featured-poem-divider-pro"></div>
+          <div className="featured-poem-author-row-pro flex items-center gap-3 mt-auto pt-4">
+            <img
+               className="featured-poem-author-img-pro"
+               src={artist.photo}
+               alt={artist.name}
+             />
+            <div className="flex flex-col">
+              <span className="featured-poem-author-name-pro">
+                {artist.name}
+              </span>
+              <span className="featured-poem-author-role-pro">
+                {artist.profileTags?.join(" & ") || "Poet"}
+              </span>
+            </div>
+            <span className="featured-poem-date-pro ml-auto text-xs text-gray-400 font-semibold">
+              Sample Work
+            </span>
           </div>
         </div>
-) : null}
+      </div>
+    </div>
+  )}
+
+  {/* Display Regular Poetry Collection */}
+  {posts.count > 0 ? (
+    <div className="max-w-6xl mx-auto mt-10 px-4 md:px-0">
+      <h3 className="poetry-section-title">Poetry Collection</h3>
+      <div className="poetry-section-title-underline"></div>
+      <div className="poetry-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-8">
+        {posts.map((post) => (
+          <div
+            key={post._id}
+            className="featured-poem-card-pro group flex flex-col justify-between relative"
+          >
+            <span className="featured-poem-quote-icon-pro">
+              <FaQuoteLeft />
+            </span>
+            <div className="featured-poem-phrase-pro mb-8">
+              {post.content}
+              <span className="featured-poem-underline-pro"></span>
+            </div>
+            <div className="featured-poem-divider-pro"></div>
+            <div className="featured-poem-author-row-pro flex items-center gap-3 mt-auto pt-4">
+              <img
+                 className="featured-poem-author-img-pro"
+                 src={artist.photo}
+                 alt={artist.name}
+               />
+              <div className="flex flex-col">
+                <span className="featured-poem-author-name-pro">
+                  {artist.name}
+                </span>
+                <span className="featured-poem-author-role-pro">
+                  {artist.profileTags?.join(" & ") || "Poet"}
+                </span>
+              </div>
+              <span className="featured-poem-date-pro ml-auto text-xs text-gray-400 font-semibold">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null}
       {/* Add these styles to your existing style tag */}
       <style jsx>{`
         .artist-profile-section {

@@ -80,7 +80,7 @@ const AuthLogin = () => {
         updateAuthState();
         // Check if user is an artist to redirect appropriately
         if (response.user.isPerformer) {
-          navigate('/artist/home');
+          navigate('/artist/profile');
         } else {
           navigate('/');
         }

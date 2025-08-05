@@ -21,10 +21,10 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Get all posts
-export const getAllPosts = async () => {
+// Get all posts with pagination
+export const getAllPosts = async (page = 1, limit = 10) => {
   try {
-    const response = await api.get('/');
+    const response = await api.get(`/?page=${page}&limit=${limit}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { success: false, message: 'Failed to fetch posts' };
@@ -51,10 +51,32 @@ export const getPostsByAuthor = async (authorId) => {
   }
 };
 
+// Like/unlike a post (toggle)
+export const togglePostLike = async (postId) => {
+  try {
+    const response = await api.put(`/${postId}/like`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { success: false, message: 'Failed to toggle post like' };
+  }
+};
+
+// Get posts by tag
+export const getPostsByTag = async (tag, page = 1, limit = 10) => {
+  try {
+    const response = await api.get(`/tag/${tag}?page=${page}&limit=${limit}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { success: false, message: 'Failed to fetch posts by tag' };
+  }
+};
+
 const postService = {
   getAllPosts,
   getPostById,
-  getPostsByAuthor
+  getPostsByAuthor,
+  togglePostLike,
+  getPostsByTag
 };
 
 export default postService;

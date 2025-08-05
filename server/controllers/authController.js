@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Post from '../models/Post.js';
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -26,6 +27,8 @@ export const register = async (req, res) => {
             password: hashedPassword,
             mobileNumber,
             isPerformer: isPerformer || false,
+            // If user is a performer, set isSampleAdded to false by default
+            ...(isPerformer ? { isSampleAdded: false } : {}),
         });
 
         if (user) {
@@ -38,6 +41,7 @@ export const register = async (req, res) => {
                     email: user.email,
                     mobileNumber: user.mobileNumber,
                     isPerformer: user.isPerformer,
+                    isSampleAdded: user.isSampleAdded,
                     token: generateToken(user._id),
                 },
             });
@@ -79,6 +83,7 @@ export const login = async (req, res) => {
                 mobileNumber: user.mobileNumber,
                 isPerformer: user.isPerformer,
                 profilePhoto: user.profilePhoto,
+                isSampleAdded: user.isSampleAdded,
                 token: generateToken(user._id),
             },
         });
@@ -190,6 +195,57 @@ export const updateUserProfile = async (req, res) => {
         }
     } catch (error) {
         console.error('Update profile error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Artist onboarding - Add sample poetry
+// @route   POST /api/auth/artist-onboarding
+// @access  Private (Only performers)
+export const artistOnboarding = async (req, res) => {
+    try {
+        const { samplePoetryHeading, samplePoetryContent, tags } = req.body;
+        
+        // Check if user is a performer
+        if (!req.user.isPerformer) {
+            return res.status(403).json({ success: false, message: 'Only performers can complete artist onboarding' });
+        }
+        
+        // Get the user
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        // Create a sample poetry post
+        const post = await Post.create({
+            heading: samplePoetryHeading,
+            content: samplePoetryContent,
+            tags: tags || [],
+            author: req.user._id,
+        });
+        
+        // Update user to mark sample as added
+        user.isSampleAdded = true;
+        await user.save();
+        
+        const populatedPost = await Post.findById(post._id).populate('author', 'name profilePhoto');
+        
+        res.status(201).json({
+            success: true,
+            message: 'Artist onboarding completed successfully',
+            post: populatedPost,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                mobileNumber: user.mobileNumber,
+                isPerformer: user.isPerformer,
+                isSampleAdded: user.isSampleAdded
+            }
+        });
+    } catch (error) {
+        console.error('Artist onboarding error:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 };

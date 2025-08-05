@@ -34,18 +34,32 @@ export const createPost = async (req, res) => {
     }
 };
 
-// @desc    Get all posts
+// @desc    Get all posts with pagination
 // @route   GET /api/posts
 // @access  Public
 export const getPosts = async (req, res) => {
     try {
+        // Pagination
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const skip = (page - 1) * limit;
+        
+        // Query with pagination
         const posts = await Post.find()
             .populate('author', 'name profilePhoto')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+        
+        // Get total count for pagination info
+        const totalPosts = await Post.countDocuments();
         
         res.status(200).json({
             success: true,
             count: posts.length,
+            totalPages: Math.ceil(totalPosts / limit),
+            currentPage: page,
+            hasMore: skip + posts.length < totalPosts,
             posts
         });
     } catch (error) {
