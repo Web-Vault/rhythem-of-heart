@@ -70,9 +70,9 @@ const ContactUs = () => {
           {/* Contact Info */}
           <div className="bg-white shadow-lg rounded-lg p-8 space-y-4">
             <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
-            <p><strong>Phone:</strong> +91 98765 43210</p>
-            <p><strong>Email:</strong> contact@yourcompany.com</p>
-            <p><strong>Address:</strong> 123 Business Street, Mumbai, India</p>
+            <p><strong>Phone:</strong> +91 6354840323</p>
+            <p><strong>Email:</strong> dhruvinsatodiya@gmail.com</p>
+            <p><strong>Address:</strong> limbdachowk, rajkot, gujarat</p>
           </div>
 
           {/* Location Map */}

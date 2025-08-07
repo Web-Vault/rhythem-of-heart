@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaPhone, FaUsers, FaMicrophone, FaClock, FaEdit, FaTrash, FaQrcode, FaCreditCard } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaUsers, FaMicrophone, FaClock, FaEdit, FaTrash, FaQrcode, FaCreditCard, FaTimes } from "react-icons/fa";
 import { getEventById } from "../../services/eventService";
 import { createBooking, getUserBookings } from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
@@ -15,6 +15,8 @@ const TicketRegistration = () => {
   const [error, setError] = useState(null);
   const [existingBooking, setExistingBooking] = useState(null);
   const [countdown, setCountdown] = useState(null);
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [rulesAccepted, setRulesAccepted] = useState(false);
 
   // Separate useEffect for data fetching
   useEffect(() => {
@@ -187,7 +189,17 @@ const TicketRegistration = () => {
     }
   };
 
-  const handlePay = async () => {
+  // Updated handlePay function
+  const handlePay = () => {
+    setShowRulesModal(true);
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!rulesAccepted) {
+      alert("Please accept the rules and regulations to proceed.");
+      return;
+    }
+
     try {
       const bookingData = {
         event: id,
@@ -206,6 +218,129 @@ const TicketRegistration = () => {
       alert(err.message || "Booking failed");
     }
   };
+
+  const closeRulesModal = () => {
+    setShowRulesModal(false);
+    setRulesAccepted(false);
+  };
+
+  // Rules and Regulations Modal Component
+  const RulesModal = () => (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2>Rules and Regulations</h2>
+          <button className="close-btn" onClick={closeRulesModal}>
+            <FaTimes />
+          </button>
+        </div>
+        
+        <div className="modal-body">
+          <div className="rules-section">
+            <h3>Registration:</h3>
+            <ul>
+              <li>Registration is mandatory for both participants and viewers.</li>
+              <li>Fees: ₹150 (for participants), ₹100 (for audience).</li>
+              <li><strong>Note:</strong> Registration is non-refundable and non-transferable under any circumstances.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Original Shayari Only:</h3>
+            <ul>
+              <li>Participants must perform their own, original work only.</li>
+              <li>Any copied or previously published work will lead to disqualification.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Time Limit:</h3>
+            <ul>
+              <li>Each participant will be given 5 minutes only.</li>
+              <li>Time limits must be respected to allow equal opportunity for all.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Dress Code:</h3>
+            <ul>
+              <li>Avoid white clothing.</li>
+              <li>Dress modestly and appropriately for the event setting.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Language & Respect:</h3>
+            <ul>
+              <li>No abusive, offensive, or disrespectful language will be tolerated.</li>
+              <li>Shayari must not target or involve religion, caste, politics, or personal attacks.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Mobile Usage:</h3>
+            <ul>
+              <li>Please keep your mobile phones on silent mode during the event.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Video & Content Policy:</h3>
+            <ul>
+              <li>Video recording is not allowed by attendees.</li>
+              <li>Short snaps or clips (only a few seconds) are allowed just for memories.</li>
+              <li>Only the organizer is allowed to upload any stories or content on social media.</li>
+              <li>Official recordings may be taken by organizers.</li>
+              <li>Performances may be uploaded online only if approved by our team.</li>
+              <li>Content selected for online platforms may be used for event promotion.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Exit Policy:</h3>
+            <ul>
+              <li>No one will be allowed to leave the venue before the event is completed.</li>
+            </ul>
+          </div>
+
+          <div className="rules-section">
+            <h3>Behaviour:</h3>
+            <ul>
+              <li>All attendees are expected to behave respectfully and responsibly.</li>
+              <li>Disruptive, rude, or inappropriate behavior toward participants, guests, or organizers will result in removal from the venue without refund.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="modal-footer">
+          <div className="checkbox-container">
+            <input
+              type="checkbox"
+              id="rulesAccepted"
+              checked={rulesAccepted}
+              onChange={(e) => setRulesAccepted(e.target.checked)}
+            />
+            <label htmlFor="rulesAccepted">
+              I have read and agree to all the rules and regulations mentioned above.
+            </label>
+          </div>
+          
+          <div className="modal-actions">
+            <button className="cancel-btn" onClick={closeRulesModal}>
+              Cancel
+            </button>
+            <button 
+              className={`confirm-payment-btn ${!rulesAccepted ? 'disabled' : ''}`}
+              onClick={handleConfirmPayment}
+              disabled={!rulesAccepted}
+            >
+              Confirm & Pay ₹{type === 'audience' ? audienceTotal : performerTotal}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const handleEditSeats = () => {
     setEditingSeats(true);
@@ -517,6 +652,9 @@ const TicketRegistration = () => {
         )}
       </div>
 
+      {/* Rules Modal */}
+      {showRulesModal && <RulesModal />}
+      
       {/* Styles */}
       <style>{`
         .ticket-registration-container {
@@ -884,17 +1022,185 @@ const TicketRegistration = () => {
           }
         }
 
-        
-.error-container {
-  max-width: 600px;
-  margin: 0 auto;
-  animation: fadeIn 0.3s ease-in-out;
-}
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          padding: 1rem;
+        }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+        .modal-content {
+          background: white;
+          border-radius: 1rem;
+          max-width: 600px;
+          width: 100%;
+          max-height: 80vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-header h2 {
+          color: #232046;
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 0;
+        }
+
+        .close-btn {
+          background: none;
+          border: none;
+          font-size: 1.2rem;
+          color: #6b7280;
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 0.5rem;
+          transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+          background: #f3f4f6;
+          color: #374151;
+        }
+
+        .modal-body {
+          flex: 1;
+          overflow-y: auto;
+          padding: 1.5rem;
+        }
+
+        .rules-section {
+          margin-bottom: 1.5rem;
+        }
+
+        .rules-section h3 {
+          color: #6366f1;
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+        }
+
+        .rules-section ul {
+          list-style: disc;
+          margin-left: 1.5rem;
+          color: #374151;
+        }
+
+        .rules-section li {
+          margin-bottom: 0.3rem;
+          line-height: 1.5;
+        }
+
+        .modal-footer {
+          padding: 1.5rem;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .checkbox-container {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+          margin-top: 0.2rem;
+          width: 1.2rem;
+          height: 1.2rem;
+          accent-color: #6366f1;
+        }
+
+        .checkbox-container label {
+          color: #374151;
+          font-size: 0.95rem;
+          line-height: 1.4;
+          cursor: pointer;
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 1rem;
+          justify-content: flex-end;
+        }
+
+        .cancel-btn {
+          background: #f3f4f6;
+          color: #374151;
+          border: none;
+          border-radius: 0.5rem;
+          padding: 0.75rem 1.5rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .cancel-btn:hover {
+          background: #e5e7eb;
+        }
+
+        .confirm-payment-btn {
+          background: #6366f1;
+          color: white;
+          border: none;
+          border-radius: 0.5rem;
+          padding: 0.75rem 1.5rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .confirm-payment-btn:hover:not(.disabled) {
+          background: #5856eb;
+        }
+
+        .confirm-payment-btn.disabled {
+          background: #d1d5db;
+          color: #9ca3af;
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+          .modal-content {
+            margin: 1rem;
+            max-height: 90vh;
+          }
+          
+          .modal-actions {
+            flex-direction: column;
+          }
+          
+          .cancel-btn,
+          .confirm-payment-btn {
+            width: 100%;
+          }
+        }
+        
+        .error-container {
+          max-width: 600px;
+          margin: 0 auto;
+          animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
       `}</style>
     </div>
   );

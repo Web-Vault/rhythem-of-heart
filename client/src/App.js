@@ -21,12 +21,13 @@ import ArtistProfile from "./pages/artist/ArtistProfile";
 import ContactUs from "./pages/contactUs";
 import PrivacyPolicy from "./pages/privacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import ShippingPolicy from "./pages/ShippingPolicy";
 
 function AppRoutes() {
   const location = useLocation();
-  const isArtistDashboard = location.pathname.startsWith("/artist/");
-  const hideNavbar = isArtistDashboard
-    || location.pathname.startsWith("/register")
+  // const isArtistDashboard = location.pathname.startsWith("/artist/");
+  const hideNavbar = location.pathname.startsWith("/register")
     || ["/login", "/onboarding", "/email-verification"].includes(location.pathname);
   return (
     <>
@@ -48,9 +49,11 @@ function AppRoutes() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/shipping-policy" element={<ShippingPolicy />} />
         {/* Artist pages */}
         {/* <Route path="/artist/home" element={<ProtectedRoute requiresPerformer={true}><ArtistHome /></ProtectedRoute>} /> */}
-        <Route path="/artist/profile" element={<ProtectedRoute requiresPerformer={true}><ArtistProfile /></ProtectedRoute>} />
+        {/* <Route path="/artist/profile" element={<ProtectedRoute requiresPerformer={true}><ArtistProfile /></ProtectedRoute>} /> */}
         {/* Add more routes for other pages here */}
         <Route path="*" element={<NotFound />} />
       </Routes>

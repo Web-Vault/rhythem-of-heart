@@ -1,9 +1,18 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaCalendarAlt, FaTicketAlt, FaStar, FaMapMarkerAlt, FaChair, FaArrowRight } from "react-icons/fa";
-import { FaQuoteLeft } from 'react-icons/fa';
-import { format } from 'date-fns';
+import {
+  FaUser,
+  FaCalendarAlt,
+  FaTicketAlt,
+  FaStar,
+  FaMapMarkerAlt,
+  FaChair,
+  FaArrowRight,
+} from "react-icons/fa";
+import { FaQuoteLeft } from "react-icons/fa";
+import { format } from "date-fns";
 import { getAllEvents } from "../../services/eventService";
+import { getAllPosts } from "../../services/postService";
 // FontAwesome icons (using CDN, so just use <i> tags as in Vue)
 
 const letterPool = [
@@ -94,6 +103,7 @@ const howItWorksSteps = [
 
 const AppHome = () => {
   const [events, setEvents] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -103,18 +113,42 @@ const AppHome = () => {
         const data = await getAllEvents();
         // Sort events by date and get the 3 most recent upcoming events
         const upcomingEvents = data
-          .filter(event => new Date(event.dateTime) > new Date())
+          .filter((event) => new Date(event.dateTime) > new Date())
           .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
           .slice(0, 3);
         setEvents(upcomingEvents);
         setLoading(false);
       } catch (err) {
-        setError(err.message || 'Failed to fetch events');
+        setError(err.message || "Failed to fetch events");
         setLoading(false);
       }
     };
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const data = await getAllPosts();
+        console.log("post data :", data );
+
+        const postData = data.posts;
+        console.log("this is data.posts :", postData);
+
+        const featuredPost = postData
+          .sort(() => 0.5 - Math.random()) // shuffle array
+          .slice(0, 3);
+        setPosts(featuredPost);
+        console.log("featuredPost :", featuredPost);
+        console.log("final Posts :", posts);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message || "Failed to fetch posts");
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, [posts]);
 
   // Memoize so the letters don't change on every render
   const floatingLetters = useMemo(() => getRandomLetters(letterPool, 24), []);
@@ -209,13 +243,17 @@ const AppHome = () => {
               >
                 <div className="event-tile-img-wrap relative">
                   <img
-                    src={event.coverImage || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"}
+                    src={
+                      event.coverImage ||
+                      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+                    }
                     alt={event.name}
                     className="event-tile-img event-tile-img-taller"
                   />
                   <div className="event-tile-img-fade-short"></div>
                   <div className="event-tile-date-badge">
-                    <FaCalendarAlt className="mr-1" /> {format(new Date(event.dateTime), 'dd MMM yyyy, h:mm a')}
+                    <FaCalendarAlt className="mr-1" />{" "}
+                    {format(new Date(event.dateTime), "dd MMM yyyy, h:mm a")}
                   </div>
                   <div className="event-tile-img-title">{event.name}</div>
                 </div>
@@ -233,11 +271,16 @@ const AppHome = () => {
                     <div className="event-tile-progress-bg">
                       <div
                         className="event-tile-progress-fill"
-                        style={{ width: `${Math.round((event.bookedSeats / event.totalSeats) * 100)}%` }}
+                        style={{
+                          width: `${Math.round(
+                            (event.bookedSeats / event.totalSeats) * 100
+                          )}%`,
+                        }}
                       ></div>
                     </div>
                     <span className="event-tile-progress-label">
-                      {Math.round((event.bookedSeats / event.totalSeats) * 100)}% booked
+                      {Math.round((event.bookedSeats / event.totalSeats) * 100)}
+                      % booked
                     </span>
                   </div>
                   <Link
@@ -259,20 +302,27 @@ const AppHome = () => {
       <section className="howitworks-section-gradient relative py-32 px-4 md:px-0 overflow-hidden">
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="howitworks-header flex flex-col justify-start text-left mb-20">
-            <h2 className="howitworks-title-pro text-4xl md:text-5xl mb-6">How It Works</h2>
+            <h2 className="howitworks-title-pro text-4xl md:text-5xl mb-6">
+              How It Works
+            </h2>
             <div className="howitworks-title-underline-pro howitworks-title-underline-animated"></div>
             <p className="howitworks-subtitle-pro text-gray-600 max-w-2xl mt-6">
               Discover the seamless journey from inspiration to performance
             </p>
           </div>
-          
+
           <div className="howitworks-steps flex flex-col md:flex-row gap-6 flex-wrap justify-center">
             {howItWorksSteps.map((step, idx) => (
-              <div key={idx} className="step-card group w-full md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 relative">
+              <div
+                key={idx}
+                className="step-card group w-full md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 relative"
+              >
                 <div className="step-number absolute -top-4 -right-4 w-20 h-20 flex items-center justify-center rotate-12 bg-indigo-50 rounded-full z-2">
-                  <span className="text-4xl font-bold text-indigo-200 -rotate-12">{idx + 1}</span>
+                  <span className="text-4xl font-bold text-indigo-200 -rotate-12">
+                    {idx + 1}
+                  </span>
                 </div>
-                
+
                 <div className="step-icon-container relative mb-8">
                   <div className="step-icon-bg w-16 h-16 flex items-center justify-center bg-indigo-50 rounded-2xl relative z-10 group-hover:bg-indigo-100 transition-all duration-300">
                     {step.icon}
@@ -281,8 +331,12 @@ const AppHome = () => {
                 </div>
 
                 <div className="step-content relative z-10">
-                  <h3 className="step-title text-2xl font-bold mb-4 text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">{step.title}</h3>
-                  <p className="step-description text-gray-600 leading-relaxed">{step.desc}</p>
+                  <h3 className="step-title text-2xl font-bold mb-4 text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">
+                    {step.title}
+                  </h3>
+                  <p className="step-description text-gray-600 leading-relaxed">
+                    {step.desc}
+                  </p>
                 </div>
 
                 <div className="decorative-line absolute bottom-0 left-0 rounded-b-2xl w-full h-1 bg-gradient-to-r from-indigo-500 to-indigo-300 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
@@ -290,7 +344,7 @@ const AppHome = () => {
             ))}
           </div>
         </div>
-        
+
         {/* Background decoration */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
           <div className="absolute top-20 left-0 w-72 h-72 bg-indigo-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -311,29 +365,28 @@ const AppHome = () => {
             </div>
           </div>
           <div className="featured-posts-grid-pro grid grid-cols-1 md:grid-cols-3 gap-10">
-            {[1, 2, 3].map((i) => (
+            {posts.map((post) => (
               <div
-                key={i}
+                key={post._id}
                 className="featured-poem-card-pro group flex flex-col justify-between relative"
               >
                 <span className="featured-poem-quote-icon-pro">
-                <FaQuoteLeft />
+                  <FaQuoteLeft />
                 </span>
                 <div className="featured-poem-phrase-pro mb-8">
-                  A beautiful piece of poetry that touches the soul and inspires
-                  the heart.
+                  {}
                   <span className="featured-poem-underline-pro"></span>
                 </div>
                 <div className="featured-poem-divider-pro"></div>
                 <div className="featured-poem-author-row-pro flex items-center gap-3 mt-auto pt-4">
                   <img
                     className="featured-poem-author-img-pro"
-                    src={`https://randomuser.me/api/portraits/men/${i}.jpg`}
+                    src={`https://randomuser.me/api/portraits/men/${post._id}.jpg`}
                     alt="Poet"
                   />
                   <div className="flex flex-col">
                     <span className="featured-poem-author-name-pro">
-                      Poet Name {i}
+                      Poet Name {post.author}
                     </span>
                     <span className="featured-poem-author-role-pro">
                       Poet & Writer
