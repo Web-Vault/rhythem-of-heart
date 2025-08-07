@@ -23,7 +23,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://rhythem-of-heart-app.onrender.com/'],
+    origin: ['http://localhost:3000', 'https://rhythm-of-heart-app.onrender.com/'],
     credentials: true
 }));
 app.use(bodyParser.json());
