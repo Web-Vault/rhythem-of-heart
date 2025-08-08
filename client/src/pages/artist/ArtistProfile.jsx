@@ -4,6 +4,8 @@ import { getUserProfile } from "../../services/authService";
 import { Tab } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = process.env.REACT_APP_BASE_URL;
+
 const ArtistProfile = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [profile, setProfile] = useState(null);
@@ -17,6 +19,7 @@ const ArtistProfile = () => {
   const navigate = useNavigate();
   const [refreshData, setRefreshData] = useState(0);
 
+
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
@@ -26,7 +29,8 @@ const ArtistProfile = () => {
 
           // Fetch user's posts
           const postsResponse = await fetch(
-            `http://localhost:5000/api/posts/author/${response.user._id}`,
+            `${BASE_URL}/api/posts/author/${response.user._id}`,  
+
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -38,7 +42,8 @@ const ArtistProfile = () => {
 
           // Fetch events where user is a performer
           const eventsResponse = await fetch(
-            `http://localhost:5000/api/events/performer/${response.user._id}`,
+            `${BASE_URL}/api/events/performer/${response.user._id}`,
+
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -50,7 +55,7 @@ const ArtistProfile = () => {
 
           // Fetch user's bookings
           const bookingsResponse = await fetch(
-            `http://localhost:5000/api/bookings/user`,
+            `${BASE_URL}/api/bookings/user`,
             {
               method: "GET",
               headers: {
@@ -117,7 +122,8 @@ const ArtistProfile = () => {
 
   const handleSaveProfile = async (updatedData) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/auth/profile`, {
+      const response = await fetch(`${BASE_URL}/api/auth/profile`, {
+
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -361,6 +367,40 @@ const ArtistProfile = () => {
                     </svg>
                   </button>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-700">Added Sample Poetry</h3>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {profile.sample ? (
+                        <div className="w-full p-3 bg-gray-50 rounded-lg">
+                          <p className="text-gray-700 whitespace-pre-wrap">{profile.sample}</p>
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 italic">No sample poetry added yet</p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() =>
+                      handleFieldEdit(
+                        "sample",
+                        profile.sample || ""
+                      )
+                    }
+                    className="p-2 text-gray-600 hover:text-purple-600"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                  </button>
+                </div>
+
               </div>
             </div>
           </Tab.Panel>

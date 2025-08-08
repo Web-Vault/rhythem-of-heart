@@ -15,14 +15,8 @@ const AppFooter = () => (
         <Link to="/events" className="footer-simple-link">
           Events
         </Link>
-        <Link to="/poets" className="footer-simple-link">
-          Poets
-        </Link>
-        <Link to="/shayaris" className="footer-simple-link">
-          Shayaris
-        </Link>
-        <Link to="/about" className="footer-simple-link">
-          About
+        <Link to="/refund-policies" className="footer-simple-link">
+          Refund Policies
         </Link>
         <Link to="/others" className="footer-simple-link">
           Others

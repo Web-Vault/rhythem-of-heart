@@ -48,12 +48,12 @@ function AppRoutes() {
 
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/refund-policies" element={<RefundPolicy />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/shipping-policy" element={<ShippingPolicy />} />
         {/* Artist pages */}
         {/* <Route path="/artist/home" element={<ProtectedRoute requiresPerformer={true}><ArtistHome /></ProtectedRoute>} /> */}
-        {/* <Route path="/artist/profile" element={<ProtectedRoute requiresPerformer={true}><ArtistProfile /></ProtectedRoute>} /> */}
+        <Route path="/artist/profile" element={<ProtectedRoute requiresPerformer={true}><ArtistProfile /></ProtectedRoute>} />
         {/* Add more routes for other pages here */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -364,17 +364,20 @@ const AppHome = () => {
               writers.
             </div>
           </div>
-          <div className="featured-posts-grid-pro grid grid-cols-1 md:grid-cols-3 gap-10">
+           <div className="featured-posts-grid-pro grid grid-cols-1 md:grid-cols-3 gap-10">
             {posts.map((post) => (
               <div
-                key={post._id}
-                className="featured-poem-card-pro group flex flex-col justify-between relative"
+              key={post._id}
+              className="featured-poem-card-pro group flex flex-col justify-between relative"
               >
+                {console.log("this.post", post)}
                 <span className="featured-poem-quote-icon-pro">
                   <FaQuoteLeft />
                 </span>
                 <div className="featured-poem-phrase-pro mb-8">
-                  {}
+                  <p className="featured-poem-phrase-text-pro">
+                    {post.content}
+                  </p>
                   <span className="featured-poem-underline-pro"></span>
                 </div>
                 <div className="featured-poem-divider-pro"></div>
@@ -385,9 +388,9 @@ const AppHome = () => {
                     alt="Poet"
                   />
                   <div className="flex flex-col">
-                    <span className="featured-poem-author-name-pro">
-                      Poet Name {post.author}
-                    </span>
+                    {/* <span className="featured-poem-author-name-pro">
+                      Poet Name {post.author.name}
+                    </span> */}
                     <span className="featured-poem-author-role-pro">
                       Poet & Writer
                     </span>
@@ -395,7 +398,7 @@ const AppHome = () => {
                 </div>
               </div>
             ))}
-          </div>
+          </div> 
         </div>
       </section>
 
