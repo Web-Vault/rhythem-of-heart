@@ -300,8 +300,8 @@ const TicketRegistration = () => {
         qrCodeRef.current.innerHTML = "";
         
         // UPI details
-        // const upiID = "rushilr196-1@oksbi"; // Replace with your actual UPI ID
-        const upiID = "aryanlathigara@okhdfcbank"; // Replace with your actual UPI ID
+        const upiID = "rushilr196-1@oksbi"; // Replace with your actual UPI ID
+        // const upiID = "aryanlathigara@okhdfcbank"; // Replace with your actual UPI ID
         const name = "Rhythm Of Heart"; 
         const amount = type === 'audience' ? audienceTotal : performerTotal;
         
@@ -388,9 +388,9 @@ const TicketRegistration = () => {
               <div className="qr-code-container">
                 <div className="qr-code" ref={qrCodeRef}></div>
                 <div className="upi-details">
-                  <div className="upi-id">UPI ID: kunallathigara499499-1@okhdfcbank</div>
+                  <div className="upi-id">UPI ID: rushilr196-1@oksbi</div>
 
-                  <div className="upi-name">Kunal Lathigara</div>
+                  <div className="upi-name">Rhythm Of Heart</div>
                 </div>
               </div>
               
