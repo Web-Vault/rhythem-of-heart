@@ -233,7 +233,7 @@ const TicketRegistration = () => {
       const ticketInfo = {
         bookingId: response.booking._id,
         eventName: event.name,
-        eventDate: new Date(event.date).toLocaleDateString(),
+        eventDate: event.date, // Store the original date string
         eventTime: event.time,
         venue: event.venue,
         attendeeCount: type === "audience" ? audienceForm.numberOfPeople : 1,
@@ -585,7 +585,7 @@ const TicketRegistration = () => {
                 <div className="ticket-info-row">
                   <div className="ticket-info-item">
                     <span className="info-label">Date:</span>
-                    <span className="info-value">{format(new Date(ticketData.eventDate), 'dd MMM yyyy')}</span>
+                    <span className="info-value">{ticketData.eventDate ? format(new Date(ticketData.eventDate), 'dd MMM yyyy') : 'N/A'}</span>
                   </div>
                   <div className="ticket-info-item">
                     <span className="info-label">Time:</span>
@@ -617,7 +617,7 @@ const TicketRegistration = () => {
               
               <div className="ticket-footer">
                 <div className="ticket-amount">Amount Paid: ₹{ticketData.amount}</div>
-                <div className="ticket-date">Booked on: {ticketData.bookingDate}</div>
+                <div className="ticket-date">Booked on: {ticketData.bookingDate || 'N/A'}</div>
               </div>
             </div>
             
