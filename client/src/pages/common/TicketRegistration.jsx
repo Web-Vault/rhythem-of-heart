@@ -300,8 +300,9 @@ const TicketRegistration = () => {
         qrCodeRef.current.innerHTML = "";
         
         // UPI details
-        const upiID = "kunallathigara499499-1@okhdfcbank"; // Replace with your actual UPI ID
-        const name = "Kunal Lathigara"; // Replace with your actual name
+        // const upiID = "rushilr196-1@oksbi"; // Replace with your actual UPI ID
+        const upiID = "aryanlathigara@okhdfcbank"; // Replace with your actual UPI ID
+        const name = "Rhythm Of Heart"; 
         const amount = type === 'audience' ? audienceTotal : performerTotal;
         
         // Create UPI payment link
