@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaCheck, FaCamera } from 'react-icons/fa';
+import { FaCheck, FaCamera, FaDownload, FaInfoCircle } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { getUserProfile, updateUserProfile } from '../../services/userService';
 import { getUserBookings } from '../../services/bookingService';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const MyProfile = () => {
   const { isLoggedIn, user: authUser, updateAuthState } = useAuth();
@@ -15,7 +17,10 @@ const MyProfile = () => {
   const [photoHover, setPhotoHover] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [currentTicket, setCurrentTicket] = useState(null);
   const fileInputRef = useRef();
+  const ticketRef = useRef();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -65,9 +70,37 @@ const MyProfile = () => {
     }
   };
 
-  const handleDownload = (ticketId) => {
-    // TODO: Implement ticket download functionality
-    alert(`Download for ticket ${ticketId}`);
+  const handleDownload = (ticket) => {
+    setCurrentTicket(ticket);
+    setShowTicketModal(true);
+  };
+  
+  const closeTicketModal = () => {
+    setShowTicketModal(false);
+  };
+  
+  const downloadTicketPDF = () => {
+    if (ticketRef.current) {
+      html2canvas(ticketRef.current, {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        const imgWidth = 210;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`${currentTicket.event.name}-Ticket.pdf`);
+      });
+    }
   };
 
   if (loading) {
@@ -169,13 +202,90 @@ const MyProfile = () => {
                     <br />
                     <span className="font-medium">Purchased:</span> {format(new Date(ticket.createdAt), 'dd MMM yyyy')}
                   </div>
-                  <button className="btn-secondary px-6 py-2 mt-2" onClick={() => handleDownload(ticket._id)}>Download Ticket</button>
+                  <button className="btn-secondary px-6 py-2 mt-2" onClick={() => handleDownload(ticket)}>Download Ticket</button>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Ticket Modal */}
+      {showTicketModal && currentTicket && (
+        <div className="modal-overlay">
+          <div className="modal-content ticket-modal">
+            <div className="modal-header">
+              <h2>Your Ticket</h2>
+              <button className="close-btn" onClick={closeTicketModal}>&times;</button>
+            </div>
+            <div className="modal-body p-6">
+              <div className="ticket-container" ref={ticketRef}>
+                <div className="ticket-header">
+                  <div className="ticket-logo">Voice of Rajkot</div>
+                  <div className="ticket-type">{currentTicket.isPerformer ? 'Performer' : 'Audience'}</div>
+                </div>
+                <div className="ticket-event-details">
+                  <h3>{currentTicket.event.name}</h3>
+                  <div className="ticket-info-row">
+                    <div className="ticket-info-item">
+                      <div className="info-label">Date</div>
+                      <div className="info-value">{format(new Date(currentTicket.event.dateTime), 'dd MMM yyyy')}</div>
+                    </div>
+                    <div className="ticket-info-item">
+                      <div className="info-label">Time</div>
+                      <div className="info-value">{format(new Date(currentTicket.event.dateTime), 'h:mm a')}</div>
+                    </div>
+                    <div className="ticket-info-item">
+                      <div className="info-label">Venue</div>
+                      <div className="info-value">{currentTicket.event.venue}</div>
+                    </div>
+                  </div>
+                  <div className="ticket-info-row">
+                    <div className="ticket-info-item">
+                      <div className="info-label">Booking ID</div>
+                      <div className="info-value">{currentTicket.ticketId}</div>
+                    </div>
+                    <div className="ticket-info-item">
+                      <div className="info-label">Seats</div>
+                      <div className="info-value">{currentTicket.numberOfSeats}</div>
+                    </div>
+                    <div className="ticket-info-item">
+                      <div className="info-label">Amount Paid</div>
+                      <div className="info-value">₹{currentTicket.isPerformer ? 0 : (currentTicket.numberOfSeats * 100)}</div>
+                    </div>
+                  </div>
+                  <div className="ticket-attendees">
+                    <div className="info-label">Attendees</div>
+                    <div className="info-value">{currentTicket.membersName?.join(', ')}</div>
+                  </div>
+                  <div className="ticket-info-row">
+                    <div className="ticket-info-item">
+                      <div className="info-label">Booking Date</div>
+                      <div className="info-value">{format(new Date(currentTicket.createdAt), 'dd MMM yyyy')}</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="ticket-footer">
+                  <div className="ticket-instructions">
+                    <div className="instruction-title">
+                      <FaInfoCircle className="inline-block mr-2" />
+                      Important Information
+                    </div>
+                    <div className="instruction-text">
+                      Please bring this ticket and payment screenshot to the event entrance for verification.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-center mt-6">
+                <button className="download-btn" onClick={downloadTicketPDF}>
+                  <FaDownload className="inline-block mr-2" /> Download PDF Ticket
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <style jsx>{`
         .myprofile-section {
           background: #f8fafc;
@@ -444,6 +554,179 @@ const MyProfile = () => {
         }
         .ticket-event-info {
           font-size: 1rem;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          padding: 1rem;
+        }
+
+        .modal-content {
+          background: white;
+          border-radius: 1rem;
+          max-width: 800px;
+          width: 100%;
+          max-height: 80vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          overflow: auto;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-header h2 {
+          color: #232046;
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 0;
+        }
+
+        .close-btn {
+          background: none;
+          border: none;
+          font-size: 1.2rem;
+          color: #6b7280;
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 0.5rem;
+          transition: all 0.2s;
+        }
+        
+        /* Ticket Modal Styles */
+        .ticket-modal {
+          max-width: 800px;
+          width: 90%;
+        }
+        
+        .ticket-container {
+          background: white;
+          border-radius: 1rem;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
+          margin-bottom: 1.5rem;
+        }
+        
+        .ticket-header {
+          background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+          color: white;
+          padding: 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .ticket-logo {
+          font-size: 1.5rem;
+          font-weight: 800;
+        }
+        
+        .ticket-type {
+          background: rgba(255, 255, 255, 0.2);
+          padding: 0.5rem 1rem;
+          border-radius: 2rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+        
+        .ticket-event-details {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .ticket-event-details h3 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #1f2937;
+          margin-bottom: 1rem;
+          text-align: center;
+        }
+        
+        .ticket-info-row {
+          display: flex;
+          flex-wrap: wrap;
+          margin-bottom: 1rem;
+          gap: 1rem;
+        }
+        
+        .ticket-info-item {
+          flex: 1;
+          min-width: 120px;
+        }
+        
+        .info-label {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #6366f1;
+          margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+          font-size: 1rem;
+          color: #1f2937;
+        }
+        
+        .ticket-attendees {
+          margin-bottom: 1rem;
+        }
+        
+        .ticket-footer {
+          padding: 1.5rem;
+          background: #f9fafb;
+        }
+        
+        .ticket-instructions {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        
+        .instruction-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #1f2937;
+          display: flex;
+          align-items: center;
+        }
+        
+        .instruction-text {
+          font-size: 0.875rem;
+          color: #4b5563;
+        }
+        
+        .download-btn {
+          background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+          color: white;
+          font-weight: 600;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          border: none;
+        }
+        
+        .download-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
       `}</style>
     </section>

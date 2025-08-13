@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaPhone, FaUsers, FaMicrophone, FaClock, FaEdit, FaTrash, FaQrcode, FaCreditCard, FaTimes } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaUsers, FaMicrophone, FaClock, FaEdit, FaTrash, FaQrcode, FaCreditCard, FaTimes, FaDownload, FaInfoCircle } from "react-icons/fa";
 import { getEventById } from "../../services/eventService";
 import { createBooking, getUserBookings } from "../../services/bookingService";
 import { useAuth } from "../../context/AuthContext";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { format } from "date-fns";
 
 const TicketRegistration = () => {
   const { type, id } = useParams(); // 'audience' or 'performer', event id
@@ -17,6 +20,10 @@ const TicketRegistration = () => {
   const [countdown, setCountdown] = useState(null);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [rulesAccepted, setRulesAccepted] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [ticketData, setTicketData] = useState(null);
+  const ticketRef = useRef(null);
 
   // Separate useEffect for data fetching
   useEffect(() => {
@@ -194,12 +201,18 @@ const TicketRegistration = () => {
     setShowRulesModal(true);
   };
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = () => {
     if (!rulesAccepted) {
       alert("Please accept the rules and regulations to proceed.");
       return;
     }
 
+    // Close rules modal and show QR code modal
+    setShowRulesModal(false);
+    setShowQRModal(true);
+  };
+
+  const handleCompletePayment = async () => {
     try {
       const bookingData = {
         event: id,
@@ -212,8 +225,28 @@ const TicketRegistration = () => {
         artType: type === "performer" ? performerForm.artType : undefined,
         duration: type === "performer" ? performerForm.duration : undefined
       };
-      await createBooking(bookingData);
-      navigate("/my-profile");
+      
+      // Create booking
+      const response = await createBooking(bookingData);
+      
+      // Generate ticket data
+      const ticketInfo = {
+        bookingId: response.booking._id,
+        eventName: event.name,
+        eventDate: new Date(event.date).toLocaleDateString(),
+        eventTime: event.time,
+        venue: event.venue,
+        attendeeCount: type === "audience" ? audienceForm.numberOfPeople : 1,
+        attendees: type === "audience" ? audienceForm.peopleNames : [performerForm.userName],
+        ticketType: type === "audience" ? "Audience" : "Performer",
+        bookingDate: new Date().toLocaleDateString(),
+        amount: type === "audience" ? audienceTotal : performerTotal
+      };
+      
+      // Set ticket data and show ticket modal
+      setTicketData(ticketInfo);
+      setShowQRModal(false);
+      setShowTicketModal(true);
     } catch (err) {
       alert(err.message || "Booking failed");
     }
@@ -222,6 +255,177 @@ const TicketRegistration = () => {
   const closeRulesModal = () => {
     setShowRulesModal(false);
     setRulesAccepted(false);
+  };
+
+  const closeQRModal = () => {
+    setShowQRModal(false);
+  };
+
+  const closeTicketModal = () => {
+    setShowTicketModal(false);
+    navigate("/my-profile");
+  };
+
+  const handleDownloadTicket = () => {
+    if (ticketRef.current) {
+      html2canvas(ticketRef.current, {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        const imgWidth = 210;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`${ticketData.eventName}-Ticket.pdf`);
+      });
+    }
+  };
+
+  // QR Code Modal Component
+  const QRCodeModal = () => {
+    const qrCodeRef = useRef(null);
+    
+    useEffect(() => {
+      if (qrCodeRef.current) {
+        // Clear any existing QR code
+        qrCodeRef.current.innerHTML = "";
+        
+        // UPI details
+        const upiID = "kunallathigara499499-1@okhdfcbank"; // Replace with your actual UPI ID
+        const name = "Kunal Lathigara"; // Replace with your actual name
+        const amount = type === 'audience' ? audienceTotal : performerTotal;
+        
+        // Create UPI payment link
+        const upiLink = `upi://pay?pa=${encodeURIComponent(upiID)}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
+        
+        // Load QRCode.js dynamically
+        const loadQRCode = async () => {
+          try {
+            // Check if QRCode is already loaded
+            if (typeof window.QRCode === 'undefined') {
+              // Create script element
+              const script = document.createElement('script');
+              script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+              script.async = true;
+              
+              // Create a promise to wait for script to load
+              const scriptLoadPromise = new Promise((resolve, reject) => {
+                script.onload = resolve;
+                script.onerror = reject;
+              });
+              
+              // Add script to document
+              document.head.appendChild(script);
+              
+              // Wait for script to load
+              await scriptLoadPromise;
+            }
+            
+            // Generate QR code using the loaded library with theme colors
+            new window.QRCode(qrCodeRef.current, {
+              text: upiLink,
+              width: 200,
+              height: 200,
+              colorDark: "#6366f1",
+              colorLight: "#ffffff",
+              correctLevel: window.QRCode.CorrectLevel.H
+            });
+            
+            // Add a subtle animation
+            qrCodeRef.current.style.opacity = '0';
+            setTimeout(() => {
+              qrCodeRef.current.style.transition = 'opacity 0.5s ease-in-out';
+              qrCodeRef.current.style.opacity = '1';
+            }, 100);
+          } catch (error) {
+            console.error('Error loading QR code library:', error);
+            // Fallback display if QR code fails to load
+            qrCodeRef.current.innerHTML = `<div style="text-align: center;">
+              <p>UPI Payment Link:</p>
+              <p style="font-weight: bold; color: #6366f1; margin-top: 10px;">${upiID}</p>
+              <p style="word-break: break-all;">${upiLink}</p>
+            </div>`;
+          }
+        };
+        
+        loadQRCode();
+      }
+    }, [audienceTotal, performerTotal, type]);
+    
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>Scan QR Code to Pay</h2>
+            <button className="close-btn" onClick={closeQRModal}>
+              <FaTimes />
+            </button>
+          </div>
+          
+          <div className="modal-body">
+            <div className="qr-section">
+              <div className="payment-header">
+                <div className="payment-amount">
+                  <span className="currency">₹</span>
+                  <span className="amount">{type === 'audience' ? audienceTotal : performerTotal}</span>
+                </div>
+                <div className="payment-event">{event?.name}</div>
+                <div className="payment-type">
+                  {type === 'audience' ? `${audienceForm.numberOfPeople} Seats` : 'Performer Registration'}
+                </div>
+              </div>
+              
+              <div className="qr-code-container">
+                <div className="qr-code" ref={qrCodeRef}></div>
+                <div className="upi-details">
+                  <div className="upi-id">UPI ID: kunallathigara499499-1@okhdfcbank</div>
+
+                  <div className="upi-name">Kunal Lathigara</div>
+                </div>
+              </div>
+              
+              <div className="payment-instructions">
+                <div className="instruction-step">
+                  <div className="step-number">1</div>
+                  <div className="step-text">Scan the QR code with any UPI app</div>
+                </div>
+                <div className="instruction-step">
+                  <div className="step-number">2</div>
+                  <div className="step-text">Complete the payment of ₹{type === 'audience' ? audienceTotal : performerTotal}</div>
+                </div>
+                <div className="instruction-step">
+                  <div className="step-number">3</div>
+                  <div className="step-text">Check the box below and click "I've Completed Payment"</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-footer">
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={closeQRModal}>
+                Cancel
+              </button>
+              <button 
+                className="confirm-payment-btn"
+                onClick={handleCompletePayment}
+              >
+                I've Completed Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Rules and Regulations Modal Component
@@ -355,6 +559,93 @@ const TicketRegistration = () => {
     navigate(-1);
   };
 
+  // Ticket Modal Component
+  const TicketModal = () => {
+    if (!ticketData) return null;
+    
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content ticket-modal">
+          <div className="modal-header">
+            <h2>Your Ticket</h2>
+            <button className="close-btn" onClick={closeTicketModal}>
+              <FaTimes />
+            </button>
+          </div>
+          
+          <div className="modal-body">
+            <div className="ticket-container" ref={ticketRef}>
+              <div className="ticket-header">
+                <div className="ticket-logo">Voice of Rajkot</div>
+                <div className="ticket-type">{ticketData.ticketType} Ticket</div>
+              </div>
+              
+              <div className="ticket-event-details">
+                <h3>{ticketData.eventName}</h3>
+                <div className="ticket-info-row">
+                  <div className="ticket-info-item">
+                    <span className="info-label">Date:</span>
+                    <span className="info-value">{format(new Date(ticketData.eventDate), 'dd MMM yyyy')}</span>
+                  </div>
+                  <div className="ticket-info-item">
+                    <span className="info-label">Time:</span>
+                    <span className="info-value">{ticketData.eventTime}</span>
+                  </div>
+                </div>
+                <div className="ticket-info-row">
+                  <div className="ticket-info-item">
+                    <span className="info-label">Venue:</span>
+                    <span className="info-value">{ticketData.venue}</span>
+                  </div>
+                  <div className="ticket-info-item">
+                    <span className="info-label">Booking ID:</span>
+                    <span className="info-value">{ticketData.bookingId}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="ticket-attendees">
+                <div className="attendee-header">
+                  <span>Attendees ({ticketData.attendeeCount})</span>
+                </div>
+                <ul className="attendee-list">
+                  {ticketData.attendees.map((name, index) => (
+                    <li key={index} className="attendee-item">{name}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="ticket-footer">
+                <div className="ticket-amount">Amount Paid: ₹{ticketData.amount}</div>
+                <div className="ticket-date">Booked on: {ticketData.bookingDate}</div>
+              </div>
+            </div>
+            
+            <div className="ticket-instructions">
+              <div className="instruction-with-icon">
+                <FaInfoCircle className="info-icon" />
+                <div className="tooltip">
+                  At the entrance of the event, you must show this ticket and the screenshot of payment you have made.
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="modal-footer">
+            <div className="modal-actions flex">
+              <button className="download-btn w-100 flex justify-center" onClick={handleDownloadTicket}>
+                <FaDownload /> Download Ticket
+              </button>
+              <button className="confirm-btn w-100" onClick={closeTicketModal}>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Loading and error handling for fetched event
   if (loading) {
     return <div className="text-center py-20">Loading event...</div>;
@@ -389,6 +680,11 @@ const TicketRegistration = () => {
           <p>₹{event.price} per seat</p>
         </div>
       </div>
+      
+      {/* QR Code Modal */}
+      {showQRModal && <QRCodeModal />}
+      {/* Ticket Modal */}
+      {showTicketModal && <TicketModal />}
 
       <div className="registration-content">
         {type === 'audience' ? (
@@ -965,41 +1261,122 @@ const TicketRegistration = () => {
         .qr-section {
           text-align: center;
           background: #fff;
-          border-radius: 1rem;
-          padding: 2rem;
+          border-radius: 1.5rem;
+          padding: 0;
           border: 1px solid #e0e7ff;
+          overflow: hidden;
+          box-shadow: 0 10px 25px rgba(99, 102, 241, 0.1);
         }
 
-        .qr-section h3 {
-          font-size: 1.5rem;
+        .payment-header {
+          background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+          color: white;
+          padding: 1.5rem;
+          text-align: center;
+        }
+
+        .payment-amount {
+          font-size: 2.5rem;
           font-weight: 800;
-          color: #232046;
-          margin-bottom: 1.5rem;
+          margin-bottom: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .currency {
+          font-size: 1.8rem;
+          margin-right: 0.2rem;
+        }
+
+        .payment-event {
+          font-size: 1.2rem;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          opacity: 0.9;
+        }
+
+        .payment-type {
+          font-size: 1rem;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 2rem;
+          padding: 0.3rem 1rem;
+          display: inline-block;
+        }
+
+        .qr-code-container {
+          padding: 2rem;
+          background: white;
+          position: relative;
         }
 
         .qr-code {
-          background: #f8fafc;
+          background: white;
           border-radius: 1rem;
-          padding: 3rem;
-          margin: 1.5rem 0;
-          border: 2px dashed #e0e7ff;
+          padding: 1rem;
+          margin: 0 auto;
+          width: 220px;
+          height: 220px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
-        .qr-code svg {
-          font-size: 8rem;
-          color: #6366f1;
-          margin-bottom: 1rem;
+        .upi-details {
+          margin-top: 1rem;
+          padding: 0.8rem;
+          background: #f8fafc;
+          border-radius: 0.5rem;
+          border: 1px solid #e0e7ff;
         }
 
-        .qr-code p {
-          color: #6b7280;
-          font-size: 1.1rem;
+        .upi-id {
+          font-weight: 600;
+          color: #232046;
+          margin-bottom: 0.2rem;
         }
 
-        .qr-note {
+        .upi-name {
           color: #6b7280;
           font-size: 0.9rem;
-          margin-top: 1rem;
+        }
+
+        .payment-instructions {
+          padding: 1.5rem;
+          background: #f8fafc;
+          border-top: 1px solid #e0e7ff;
+        }
+
+        .instruction-step {
+          display: flex;
+          align-items: flex-start;
+          margin-bottom: 1rem;
+          text-align: left;
+        }
+
+        .instruction-step:last-child {
+          margin-bottom: 0;
+        }
+
+        .step-number {
+          background: #6366f1;
+          color: white;
+          width: 1.8rem;
+          height: 1.8rem;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          margin-right: 0.8rem;
+          flex-shrink: 0;
+        }
+
+        .step-text {
+          color: #374151;
+          font-size: 0.95rem;
+          padding-top: 0.2rem;
         }
 
         @media (max-width: 768px) {
@@ -1040,7 +1417,7 @@ const TicketRegistration = () => {
         .modal-content {
           background: white;
           border-radius: 1rem;
-          max-width: 600px;
+          max-width: 800px;
           width: 100%;
           max-height: 80vh;
           display: flex;
@@ -1122,6 +1499,181 @@ const TicketRegistration = () => {
         .checkbox-container input[type="checkbox"] {
           margin-top: 0.2rem;
           width: 1.2rem;
+        }
+        
+        /* Ticket Modal Styles */
+        .ticket-modal {
+          max-width: 800px;
+          width: 90%;
+        }
+        
+        .ticket-container {
+          background: white;
+          border-radius: 1rem;
+          overflow: hidden;
+          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
+          margin-bottom: 1.5rem;
+        }
+        
+        .ticket-header {
+          background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+          color: white;
+          padding: 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .ticket-logo {
+          font-size: 1.5rem;
+          font-weight: 800;
+        }
+        
+        .ticket-type {
+          background: rgba(255, 255, 255, 0.2);
+          padding: 0.5rem 1rem;
+          border-radius: 2rem;
+          font-size: 0.9rem;
+          font-weight: 600;
+        }
+        
+        .ticket-event-details {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .ticket-event-details h3 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #1f2937;
+          margin-bottom: 1rem;
+          text-align: center;
+        }
+        
+        .ticket-info-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0.75rem;
+        }
+        
+        .ticket-info-item {
+          flex: 1;
+        }
+        
+        .info-label {
+          font-weight: 600;
+          color: #4b5563;
+          margin-right: 0.5rem;
+        }
+        
+        .info-value {
+          color: #1f2937;
+        }
+        
+        .ticket-attendees {
+          padding: 1.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .attendee-header {
+          font-weight: 600;
+          color: #4b5563;
+          margin-bottom: 0.75rem;
+        }
+        
+        .attendee-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        
+        .attendee-item {
+          padding: 0.5rem 0;
+          border-bottom: 1px dashed #e5e7eb;
+          color: #1f2937;
+        }
+        
+        .attendee-item:last-child {
+          border-bottom: none;
+        }
+        
+        .ticket-footer {
+          padding: 1.5rem;
+          display: flex;
+          justify-content: space-between;
+          background: #f9fafb;
+        }
+        
+        .ticket-amount {
+          font-weight: 700;
+          color: #6366f1;
+        }
+        
+        .ticket-date {
+          color: #6b7280;
+          font-size: 0.9rem;
+        }
+        
+        .ticket-instructions {
+          margin-top: 1.5rem;
+          display: flex;
+          justify-content: center;
+        }
+        
+        .instruction-with-icon {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+        }
+        
+        .info-icon {
+          color: #6366f1;
+          font-size: 1.5rem;
+          cursor: help;
+        }
+        
+        .tooltip {
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #1f2937;
+          color: white;
+          padding: 0.75rem 1rem;
+          border-radius: 0.5rem;
+          font-size: 0.9rem;
+          width: 300px;
+          text-align: center;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.2s;
+          z-index: 10;
+        }
+        
+        .instruction-with-icon:hover .tooltip {
+          opacity: 1;
+          visibility: visible;
+          bottom: calc(100% + 10px);
+        }
+        
+        .download-btn {
+          background: #6366f1;
+          color: white;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          transition: all 0.2s;
+        }
+        
+        .download-btn:hover {
+          background: #4f46e5;
+        }
           height: 1.2rem;
           accent-color: #6366f1;
         }

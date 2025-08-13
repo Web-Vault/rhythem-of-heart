@@ -63,7 +63,6 @@ export const createBooking = async (req, res) => {
             }
         }
         
-        eventData.performers.push(req.user._id);
         await eventData.save();
 
         res.status(201).json({
