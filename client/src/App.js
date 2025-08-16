@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RequireAuth from "./components/RequireAuth";
 import AppNavbar from "./components/AppNavbar";
 import AppHome from "./pages/common/AppHome";
 import AppEvents from "./pages/common/AppEvents";
@@ -66,7 +67,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppRoutes />
+        <RequireAuth>
+          <AppRoutes />
+        </RequireAuth>
       </Router>
     </AuthProvider>
   );

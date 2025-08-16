@@ -240,7 +240,11 @@ const TicketRegistration = () => {
         attendees: type === "audience" ? audienceForm.peopleNames : [performerForm.userName],
         ticketType: type === "audience" ? "Audience" : "Performer",
         bookingDate: new Date().toLocaleDateString(),
-        amount: type === "audience" ? audienceTotal : performerTotal
+        amount: type === "audience" ? audienceTotal : performerTotal,
+        // Performer-specific details
+        artType: type === "performer" ? performerForm.artType : undefined,
+        duration: type === "performer" ? performerForm.duration : undefined,
+        isPerformer: type === "performer"
       };
       
       // Set ticket data and show ticket modal
@@ -300,8 +304,8 @@ const TicketRegistration = () => {
         qrCodeRef.current.innerHTML = "";
         
         // UPI details
-        const upiID = "rushilr196-1@oksbi"; // Replace with your actual UPI ID
-        // const upiID = "aryanlathigara@okhdfcbank"; // Replace with your actual UPI ID
+        const upiID = "rushilr196-1@oksbi"; 
+        // const upiID = "aryanlathigara@okhdfcbank"; 
         const name = "Rhythm Of Heart"; 
         const amount = type === 'audience' ? audienceTotal : performerTotal;
         
@@ -575,10 +579,13 @@ const TicketRegistration = () => {
           </div>
           
           <div className="modal-body">
-            <div className="ticket-container" ref={ticketRef}>
+            <div className={`ticket-container ${ticketData.isPerformer ? 'performer-ticket' : 'audience-ticket'}`} ref={ticketRef}>
               <div className="ticket-header">
                 <div className="ticket-logo">Voice of Rajkot</div>
-                <div className="ticket-type">{ticketData.ticketType} Ticket</div>
+                <div className={`ticket-type ${ticketData.isPerformer ? 'performer-type' : 'audience-type'}`}>
+                  {ticketData.ticketType} Ticket
+                  {ticketData.isPerformer && <FaMicrophone className="performer-icon" />}
+                </div>
               </div>
               
               <div className="ticket-event-details">
@@ -605,9 +612,32 @@ const TicketRegistration = () => {
                 </div>
               </div>
               
+              {/* Performer-specific details */}
+              {ticketData.isPerformer && (
+                <div className="ticket-performer-details">
+                  <div className="performer-details-header">
+                    <FaMicrophone className="performer-header-icon" />
+                    <span>Performance Details</span>
+                  </div>
+                  <div className="ticket-info-row">
+                    <div className="ticket-info-item">
+                      <span className="info-label">Art Type:</span>
+                      <span className="info-value performer-art-type">{ticketData.artType}</span>
+                    </div>
+                    <div className="ticket-info-item">
+                      <span className="info-label">Duration:</span>
+                      <span className="info-value performer-duration">
+                        <FaClock className="duration-icon" />
+                        {ticketData.duration}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="ticket-attendees">
                 <div className="attendee-header">
-                  <span>Attendees ({ticketData.attendeeCount})</span>
+                  <span>{ticketData.isPerformer ? 'Performer' : `Attendees (${ticketData.attendeeCount})`}</span>
                 </div>
                 <ul className="attendee-list">
                   {ticketData.attendees.map((name, index) => (
@@ -872,12 +902,8 @@ const TicketRegistration = () => {
                       onChange={(e) => handlePerformerInputChange('artType', e.target.value)}
                     >
                       <option value="">Select art type</option>
-                      <option value="poetry">Poetry</option>
-                      <option value="music">Music</option>
-                      <option value="dance">Dance</option>
-                      <option value="comedy">Comedy</option>
+                      <option value="poetry" selected>Poetry</option>
                       <option value="storytelling">Storytelling</option>
-                      <option value="other">Other</option>
                     </select>
                   </div>
                   <div className="form-group">
